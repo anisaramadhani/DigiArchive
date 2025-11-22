@@ -1,6 +1,7 @@
 "use client";
 import { useState } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 // Navbar
 const Navbar: React.FC = () => {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -52,9 +53,9 @@ const Hero: React.FC = () => {
             Sistem Pengelolaan Arsip Digital yang Mudah, Aman, dan Modern. Kelola semua dokumen penting Anda dengan teknologi terdepan.
           </p>
           <div className="hero-buttons">
-            <a href="/register" className="btn btn-primary btn-hero">
+            <Link href="/register" className="btn btn-primary btn-hero">
               <i className="fas fa-rocket"></i> Mulai Sekarang
-            </a>
+            </Link>
             <a href="#fitur" className="btn btn-outline btn-hero">
               <i className="fas fa-info-circle"></i> Pelajari Lebih
             </a>
