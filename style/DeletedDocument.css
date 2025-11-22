@@ -1,0 +1,102 @@
+:root {
+  /* fallback colors will be overridden by existing project variables */
+  --dd-bg: var(--background, #f7faff);
+}
+
+.deleted-documents {
+  margin: 1.5rem auto;
+  padding: 2rem;
+  max-width: 1100px;
+  background: var(--background);
+  border-radius: 20px;
+  box-shadow: 0 10px 40px rgba(80,80,160,0.06);
+}
+
+.deleted-documents h2 {
+  margin: 0 0 1rem 0;
+  font-size: 1.5rem;
+  color: var(--text-dark);
+  font-weight: 700;
+}
+
+.table-container {
+  overflow-x: auto;
+  border-radius: 15px;
+  box-shadow: 0 4px 20px rgba(80,80,160,0.05);
+  background: #fff;
+}
+
+.deleted-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+}
+
+.deleted-table th {
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  color: #fff;
+  font-weight: 600;
+  padding: 1rem 1rem;
+  text-align: left;
+}
+
+.deleted-table td {
+  padding: 1rem 1rem;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+
+.deleted-table tbody tr:hover {
+  background: var(--accent2);
+  transform: scale(1.01);
+}
+
+.empty-message {
+  color: #7f8c8d;
+  padding: 1.5rem 0;
+  text-align: center;
+}
+
+.info {
+  margin-top: 0.75rem;
+  color: var(--text-accent);
+  font-size: 0.95rem;
+}
+
+.warning {
+  color: #d97706;
+  font-weight: 700;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+}
+
+.restore-btn, .permanent-delete-btn {
+  padding: 0.6rem 0.9rem;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s ease;
+}
+
+.restore-btn {
+  background: linear-gradient(135deg, #3ecf8e, #27ae60);
+  color: #fff;
+}
+.restore-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(46,204,113,0.12); }
+
+.permanent-delete-btn {
+  background: linear-gradient(135deg, #f67280, #c0392b);
+  color: #fff;
+}
+.permanent-delete-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(231,76,60,0.12); }
+
+@media (max-width: 900px) {
+  .deleted-documents { padding: 1.25rem; margin: 1rem; }
+  .deleted-table { display: block; width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .deleted-table th, .deleted-table td { white-space: nowrap; }
+}
