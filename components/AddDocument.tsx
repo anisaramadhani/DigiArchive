@@ -76,41 +76,36 @@ export default function AddDocument() {
     reader.readAsDataURL(file);
   };
 
-  const handleSave = () => {
-  setError('');
-  setSuccessMessage('');
+  const handleSave = async () => {
+    if (!photoDataUrl) {
+      setError("Ambil foto atau unggah gambar terlebih dahulu");
+      return;
+    }
 
-  if (!photoDataUrl) {
-    setError('Ambil foto atau unggah gambar terlebih dahulu');
-    return;
-  }
+    try {
+      const res = await fetch("/api/documents/add", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: "Judul dokumen",
+          category: selectedCategory,
+          image: photoDataUrl,
+        }),
+      });
 
-  try {
-    const storeKey = 'digiarchive_local_arsip';
-    const existing = JSON.parse(localStorage.getItem(storeKey) || '[]');
-    const item = {
-      id: Date.now(),
-      category: selectedCategory,
-      image: photoDataUrl,
-      createdAt: new Date().toISOString()
-    };
-    existing.unshift(item);
-    localStorage.setItem(storeKey, JSON.stringify(existing));
-
-    // Clear foto agar siap tambah lagi
-    setPhotoDataUrl('');
-
-    // Stop camera
-    stopCamera();
-
-    // Set pesan sukses
-    setSuccessMessage('Dokumen berhasil disimpan!');
-  } catch (err) {
-    console.error(err);
-    setError('Gagal menyimpan dokumen.');
-  }
-};
-
+      const data = await res.json();
+      if (res.ok) {
+        setSuccessMessage("Dokumen berhasil disimpan!");
+        setPhotoDataUrl("");
+        stopCamera();
+        // Tidak redirect lagi
+      } else {
+        setError(data.message || "Gagal menyimpan dokumen");
+      }
+    } catch (err) {
+      setError("Terjadi kesalahan server");
+    }
+  };
 
   return (
     <div className="app">
