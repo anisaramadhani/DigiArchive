@@ -1,0 +1,198 @@
+:root {
+  --primary: #5b7cfa;
+  --primary-dark: #4256b8;
+  --accent: #b3c7f7;
+  --accent2: #eaf0fb;
+  --success: #3ecf8e;
+  --danger: #f67280;
+  --warning: #ffe082;
+  --text-dark: #263159;
+  --text-accent: #4a6fa5;
+  --background: #f7faff;
+  --border: #dde6f7;
+}
+.profile-view-card {
+    width: 100%;
+    max-width: 1500px;
+    margin: 2rem auto 0 auto;
+    background: var(--background);
+    border-radius: 24px;
+    box-shadow: 0 2px 12px rgba(80,80,160,0.08);
+    padding: 2.5rem 2.5rem 2rem 2.5rem;
+    box-sizing: border-box;
+}
+
+.profile-title {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: var(--text-dark);
+    margin-bottom: 2.5rem;
+    text-align: center;
+}
+
+.profile-avatar-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 2.5rem;
+}
+
+.profile-avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3.5rem;
+    color: #fff;
+    margin-bottom: 1.2rem;
+    overflow: hidden;
+}
+.profile-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+.profile-identity {
+    text-align: center;
+    margin-bottom: 1.2rem;
+}
+.profile-name {
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: var(--text-dark);
+    margin-top:0.5rem;
+}
+.profile-email {
+    color: var(--primary);
+    font-size: 1.05rem;
+    margin-top: 0.2rem;
+}
+
+.profile-main-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2.5rem;
+    align-items: start;
+    margin-top: 2.5rem;
+}
+
+.profile-info-section,
+.profile-password-section {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 1px 4px rgba(80,80,160,0.04);
+    padding: 2rem 2rem 1.5rem 2rem;
+}
+
+.profile-info-title,
+.profile-password-title {
+    font-weight: bold;
+    color: var(--primary-dark);
+    margin-top: -1rem;
+    margin-bottom: 1.2rem;
+    font-size: 1.3rem;
+    text-align: center;
+}
+
+.profile-info-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+    margin-top: 1.2rem;
+}
+
+.profile-info-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.profile-info-field label {
+    color: var(--primary-dark);
+    font-weight: 500;
+    margin-bottom: 0.1rem;
+    font-size: 1rem;
+    margin-left: 2px;
+}
+
+.profile-info-value {
+    background: var(--accent2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.7rem 1rem;
+    color: var(--text-dark);
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.form-group {
+    margin-bottom: 1.2rem;
+    text-align: left;
+}
+.form-label {
+    font-weight: 500;
+    color: var(--primary-dark);
+    margin-bottom: 0.3rem;
+    display: block;
+}
+.form-input {
+    width: 100%;
+    padding: 0.7rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 1rem;
+    background: var(--accent2);
+    color: var(--text-dark);
+    transition: border 0.2s;
+}
+.form-input:focus {
+    border-color: var(--primary);
+    outline: none;
+}
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: #fff;
+    border: none;
+    padding: 0.7rem 2rem;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background 0.2s;
+}
+.btn-primary:hover {
+    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+}
+
+.alert-success {
+    background: #e8f5e8;
+    color: var(--success);
+    padding: 10px 20px;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+.alert-error {
+    background: #f8d7da;
+    color: var(--danger);
+    padding: 10px 20px;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+
+@media (max-width: 900px) {
+    .profile-main-grid {
+        grid-template-columns: 1fr;
+        gap: 1.2rem;
+    }
+    .profile-info-section,
+    .profile-password-section {
+        padding: 1rem 0.5rem;
+    }
+    .profile-view-card {
+        padding: 1.2rem 0.5rem;
+    }
+}
