@@ -2,6 +2,9 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import Head from 'next/head';
+import '../style/Landing.css';
+
 // Navbar
 const Navbar: React.FC = () => {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -159,8 +162,8 @@ const Home: React.FC = () => {
       <Navbar />
       <Hero />
       <Features />
-      <About />
       <Team />
+      <About />
     </div>
   );
 };

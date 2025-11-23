@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import '../style/Register.css';
 
 const RegisterForm = () => {
   const [formData, setFormData] = useState({

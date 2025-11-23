@@ -2,7 +2,8 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link'; // Menggunakan Link dari next/link untuk routing internal
-import Image from 'next/image'; // Menggunakan Image dari next/image untuk gambar optimasi
+import Image from 'next/image';
+import '../style/DeletedDocument.css';
 
 // Fungsi untuk menghitung sisa hari
 function daysLeft(deletedAt: number) {
