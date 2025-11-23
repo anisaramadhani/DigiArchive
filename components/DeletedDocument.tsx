@@ -37,30 +37,20 @@ const DeletedDocuments: React.FC<DeletedDocumentsProps> = ({ deletedDocs = [], o
           <p>Sistem Pengelolaan Arsip Digital</p>
         </div>
         <div className="sidebar-nav">
-          <Link href="/dashboard" passHref>
-            <a className="nav-item">
-              <i className="fa-solid fa-layer-group"></i> Dashboard
-            </a>
+          <Link href="/dashboard" className="nav-item">
+            <i className="fa-solid fa-layer-group"></i> Dashboard
           </Link>
-          <Link href="/tambah-dokumen" passHref>
-            <a className="nav-item">
-              <i className="fa fa-camera"></i> Tambah Dokumen
-            </a>
+          <Link href="/tambah-dokumen" className="nav-item">
+            <i className="fa fa-camera"></i> Tambah Dokumen
           </Link>
-          <Link href="/arsip" passHref>
-            <a className="nav-item">
-              <i className="fas fa-folder-open"></i> Daftar Arsip
-            </a>
+          <Link href="/arsip" className="nav-item">
+            <i className="fas fa-folder-open"></i> Daftar Arsip
           </Link>
-          <Link href="/recycle-bin" passHref>
-            <a className="nav-item active">
-              <i className="fas fa-trash"></i> Recycle Bin
-            </a>
+          <Link href="/recycle-bin" className="nav-item active">
+            <i className="fas fa-trash"></i> Recycle Bin
           </Link>
-          <Link href="/profile" passHref>
-            <a className="nav-item">
-              <i className="fas fa-user"></i> Profile
-            </a>
+          <Link href="/profile" className="nav-item">
+            <i className="fas fa-user"></i> Profile
           </Link>
         </div>
         <div className="sidebar-footer">
