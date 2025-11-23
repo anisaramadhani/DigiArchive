@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation'; // Use app-router navigation
 import Image from 'next/image';
+import '../style/Register.css';
 
 const Login: React.FC = () => {
   // State untuk mengelola input formulir

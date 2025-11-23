@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation'; // Use app-router navigation
 import Link from 'next/link'; // Link works with className in App Router
 import Image from 'next/image';
+import '../style/Dashboard.css';
 
 type DashboardProps = {
   totalArsip?: number;
