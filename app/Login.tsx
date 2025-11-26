@@ -1,19 +1,17 @@
 "use client";
 import { useState } from 'react';
-import { useRouter } from 'next/navigation'; // Use app-router navigation
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import '../style/Register.css';
+import './style/Register.css';
 
 const Login: React.FC = () => {
-  // State untuk mengelola input formulir
   const [npm, setNpm] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  // Inisialisasi useRouter untuk pengalihan (app router)
   const router = useRouter();
 
-  // Menangani perubahan input
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     if (name === 'npm') {
@@ -23,43 +21,43 @@ const Login: React.FC = () => {
     }
   };
 
-  // Menangani pengiriman formulir
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Basic validation
     if (!npm || !password) {
       setErrors(['NPM dan Password harus diisi']);
       return;
     }
 
+    setLoading(true);
     setErrors([]);
 
-    // Call demo API route
-    (async () => {
-      try {
-        const res = await fetch('/api/auth/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ npm, password }),
-        });
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ npm, password }),
+      });
 
-        const data = await res.json();
+      const data = await res.json();
 
-        if (!res.ok) {
-          setErrors([data?.error || 'Login failed']);
-          return;
-        }
-
-        // store demo token and redirect
-        if (data?.token) {
-          localStorage.setItem('token', data.token);
-        }
-        router.push('/dashboard');
-      } catch (err) {
-        setErrors(['Network error']);
+      if (!res.ok) {
+        setErrors([data?.message || 'Login failed']);
+        return;
       }
-    })();
+
+      // Simpan token dan user data
+      if (data?.token) {
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+      }
+      router.push('/dashboard');
+    } catch (err) {
+      setErrors(['Terjadi kesalahan network']);
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -67,7 +65,7 @@ const Login: React.FC = () => {
       <div className="register-wrapper">
         <div className="register-left">
           <div className="logo-img">
-            <Image src="/images/Logo 2.png" alt="Logo DigiArchive" className="logo-img" width={100} height={100} />
+            <Image src="/images/Logo 2.png" alt="Logo DigiArchive" width={150} height={150} />
           </div>
           <h1>DigiArchive</h1>
           <p>Masuk ke sistem pengelolaan arsip digital yang modern dan efisien</p>
@@ -77,14 +75,11 @@ const Login: React.FC = () => {
             <h2>Login</h2>
             <p className="subtitle">Masuk ke akun DigiArchive Anda</p>
 
-            {/* Menampilkan error jika ada */}
             {errors.length > 0 && (
               <div className="alert">
-                <ul>
-                  {errors.map((error, index) => (
-                    <li key={index}>{error}</li>
-                  ))}
-                </ul>
+                {errors.map((error, index) => (
+                  <p key={index}>{error}</p>
+                ))}
               </div>
             )}
 
@@ -97,7 +92,7 @@ const Login: React.FC = () => {
                   id="npm"
                   value={npm}
                   onChange={handleInputChange}
-                  placeholder="NPM"
+                  placeholder="NPM Anda"
                   required
                 />
               </div>
@@ -114,7 +109,9 @@ const Login: React.FC = () => {
                 />
               </div>
             </div>
-            <button type="submit" className="btn-register">Masuk</button>
+            <button type="submit" className="btn-register" disabled={loading}>
+              {loading ? 'Sedang masuk...' : 'Masuk'}
+            </button>
             <p className="back-link">
               Belum punya akun? <a href="/register">Daftar di sini</a>
             </p>

@@ -15,6 +15,7 @@ const RegisterForm = () => {
   });
 
   const [errors, setErrors] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -25,14 +26,57 @@ const RegisterForm = () => {
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (formData.password !== formData.password_confirmation) {
-      setErrors(['Passwords do not match.']);
+    const newErrors: string[] = [];
+
+    // Validasi
+    if (!formData.nama) newErrors.push('Nama lengkap harus diisi');
+    if (!formData.email) newErrors.push('Email harus diisi');
+    if (!formData.npm) newErrors.push('NPM harus diisi');
+    if (!formData.jurusan) newErrors.push('Jurusan harus diisi');
+    if (!formData.password) newErrors.push('Password harus diisi');
+    if (formData.password.length < 6) newErrors.push('Password minimal 6 karakter');
+    if (formData.password !== formData.password_confirmation) newErrors.push('Password tidak cocok');
+
+    if (newErrors.length > 0) {
+      setErrors(newErrors);
       return;
     }
+
+    setLoading(true);
     setErrors([]);
-    router.push('/dashboard');
+
+    try {
+      const res = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nama: formData.nama,
+          email: formData.email,
+          npm: formData.npm,
+          jurusan: formData.jurusan,
+          password: formData.password,
+          password_confirmation: formData.password_confirmation,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setErrors([data?.message || 'Registrasi gagal']);
+        return;
+      }
+
+      // Registrasi berhasil, redirect ke login
+      alert('Pendaftaran berhasil! Silakan login dengan akun Anda.');
+      router.push('/login');
+    } catch (err) {
+      setErrors(['Terjadi kesalahan network']);
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -40,7 +84,7 @@ const RegisterForm = () => {
       <div className="register-wrapper">
         <div className="register-left">
           <div className="logo-circle">
-            <Image src="/images/landing-hero.png" alt="Logo DigiArchive" className="logo-img" width={100} height={100} />
+            <Image src="/images/landing-hero.png" alt="Logo DigiArchive" width={150} height={150} />
           </div>
           <h1>DigiArchive</h1>
           <p>Bergabunglah dengan sistem pengelolaan arsip digital yang modern dan efisien</p>
@@ -52,11 +96,9 @@ const RegisterForm = () => {
 
             {errors.length > 0 && (
               <div className="alert">
-                <ul>
-                  {errors.map((error, index) => (
-                    <li key={index}>{error}</li>
-                  ))}
-                </ul>
+                {errors.map((error, index) => (
+                  <p key={index}>{error}</p>
+                ))}
               </div>
             )}
 
@@ -96,7 +138,7 @@ const RegisterForm = () => {
                   id="npm"
                   value={formData.npm}
                   onChange={handleInputChange}
-                  placeholder="NPM"
+                  placeholder="NPM Anda"
                   required
                 />
               </div>
@@ -123,7 +165,7 @@ const RegisterForm = () => {
                   id="password"
                   value={formData.password}
                   onChange={handleInputChange}
-                  placeholder="Minimal 8 karakter"
+                  placeholder="Minimal 6 karakter"
                   required
                 />
               </div>
@@ -141,7 +183,9 @@ const RegisterForm = () => {
               </div>
             </div>
 
-            <button type="submit" className="btn-register">Daftar Sekarang</button>
+            <button type="submit" className="btn-register" disabled={loading}>
+              {loading ? 'Sedang mendaftar...' : 'Daftar Sekarang'}
+            </button>
             <p className="back-link">
               Sudah punya akun? <a href="/login">Masuk di sini</a>
             </p>
