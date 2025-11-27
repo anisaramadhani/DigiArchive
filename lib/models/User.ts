@@ -1,5 +1,15 @@
-import mongoose from 'mongoose';
+import mongoose, { Document } from 'mongoose';
 import bcryptjs from 'bcryptjs';
+
+interface IUser extends Document {
+  nama: string;
+  email: string;
+  npm: string;
+  jurusan: string;
+  password: string;
+  createdAt: Date;
+  comparePassword(password: string): Promise<boolean>;
+}
 
 const userSchema = new mongoose.Schema(
   {
@@ -39,24 +49,22 @@ const userSchema = new mongoose.Schema(
 );
 
 // Hash password sebelum menyimpan
-userSchema.pre('save', async function(next: any) {
+userSchema.pre<IUser>('save', async function(this: IUser) {
   if (!this.isModified('password')) {
-    return next();
+    return;
   }
 
   try {
     const salt = await bcryptjs.genSalt(10);
-    const hashedPassword = await bcryptjs.hash(this.password, salt);
-    this.password = hashedPassword;
-    next();
+    this.password = await bcryptjs.hash(this.password, salt);
   } catch (error) {
-    next(error);
+    throw error;
   }
 });
 
 // Method untuk membandingkan password
-userSchema.methods.comparePassword = async function(enteredPassword: string) {
+userSchema.methods.comparePassword = async function(this: IUser, enteredPassword: string) {
   return await bcryptjs.compare(enteredPassword, this.password);
 };
 
-export default mongoose.models.User || mongoose.model('User', userSchema);
+export default mongoose.models.User || mongoose.model<IUser>('User', userSchema);

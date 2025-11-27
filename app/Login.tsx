@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import './style/Register.css';
+import '../style/login.css';
 
 const Login: React.FC = () => {
   const [npm, setNpm] = useState('');

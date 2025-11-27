@@ -86,10 +86,11 @@ export async function POST(request: NextRequest) {
       },
       { status: 201 }
     );
-  } catch (error) {
-    console.error('Register error:', error);
+  } catch (error: any) {
+    console.error('Register error details:', error);
+    console.error('Register error stack:', error?.stack);
     return NextResponse.json(
-      { success: false, message: 'Terjadi kesalahan server' },
+      { success: false, message: 'Terjadi kesalahan server', error: error?.message || String(error) },
       { status: 500 }
     );
   }
