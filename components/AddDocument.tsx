@@ -10,6 +10,7 @@ export default function AddDocument() {
   const [error, setError] = useState<string>(''); 
   const [successMessage, setSuccessMessage] = useState<string>('');
   const [selectedCategory, setSelectedCategory] = useState<string>('Kategori');
+  const [title, setTitle] = useState<string>('');
   const router = useRouter();  
 
   // Fungsi untuk logout dan kembali ke landing page
@@ -82,6 +83,7 @@ export default function AddDocument() {
       return;
     }
 
+<<<<<<< HEAD
     try {
       const res = await fetch("/api/documents/add", {
         method: "POST",
@@ -92,6 +94,70 @@ export default function AddDocument() {
           image: photoDataUrl,
         }),
       });
+=======
+  if (!photoDataUrl) {
+    setError('Ambil foto atau unggah gambar terlebih dahulu');
+    return;
+  }
+
+  try {
+    // Prepare payload to send to server
+    const payload = {
+      title: title || `Dokumen ${new Date().toLocaleString()}`,
+      category: selectedCategory === 'Kategori' ? 'Lainnya' : selectedCategory,
+      image: photoDataUrl,
+    };
+
+    const userId = localStorage.getItem('userId') || undefined;
+
+    // Try to save to server; fallback to localStorage if server fails
+    fetch('/api/documents/add', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(userId ? { 'x-user-id': userId } : {}),
+      },
+      body: JSON.stringify(payload),
+    })
+      .then(async (res) => {
+        if (!res.ok) {
+          const txt = await res.text().catch(() => '');
+          throw new Error(txt || `Server returned ${res.status}`);
+        }
+        return res.json();
+      })
+      .then((data) => {
+        setPhotoDataUrl('');
+        stopCamera();
+        setTitle('');
+        setSuccessMessage('Dokumen berhasil disimpan ke server!');
+      })
+      .catch((err) => {
+        console.warn('API save failed, fallback to localStorage:', err);
+        const storeKey = 'digiarchive_local_arsip';
+        const existing = JSON.parse(localStorage.getItem(storeKey) || '[]');
+        const item = {
+          id: Date.now(),
+          title: title || `Dokumen ${new Date().toLocaleString()}`,
+          category: selectedCategory,
+          image: photoDataUrl,
+          createdAt: new Date().toISOString(),
+          _savedToServer: false,
+        };
+        existing.unshift(item);
+        localStorage.setItem(storeKey, JSON.stringify(existing));
+
+        setPhotoDataUrl('');
+        stopCamera();
+        setTitle('');
+        setSuccessMessage('Dokumen disimpan secara lokal (offline).');
+      });
+  } catch (err) {
+    console.error(err);
+    setError('Gagal menyimpan dokumen.');
+  }
+};
+>>>>>>> 3720c41f7b6f9f816a147b70cea4b23939feb66f
 
       const data = await res.json();
       if (res.ok) {
@@ -176,6 +242,13 @@ export default function AddDocument() {
                 </div>
 
                 <div className="form-row">
+                  <input
+                    type="text"
+                    placeholder="Judul dokumen"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    style={{ padding: '8px', marginRight: '8px', flex: 1 }}
+                  />
                   <select value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value)}>
                     {categories.map(c => <option key={c} value={c}>{c}</option>)}
                   </select>

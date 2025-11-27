@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import mongoose from 'mongoose';
+<<<<<<< HEAD
 import User from '@/lib/models/User';
+=======
+import User from '../../../../lib/models/User';
+>>>>>>> 3720c41f7b6f9f816a147b70cea4b23939feb66f
 
 async function connectDB() {
   if (mongoose.connections[0].readyState) {

@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import mongoose from 'mongoose';
+<<<<<<< HEAD
 import Document from '@/lib/models/Document';
 import DeletedDocument from '@/lib/models/DeletedDocument';
+=======
+import Document from '../../../lib/models/document';
+import DeletedDocument from '../../../lib/models/deleteddocument';
+>>>>>>> 3720c41f7b6f9f816a147b70cea4b23939feb66f
 
 // Connect to database
 async function connectDB() {
