@@ -21,38 +21,64 @@ export default function ProfilePage() {
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
-      router.replace("/login"); // redirect ke login jika token tidak ada
+      router.replace("/login");
       return;
     }
 
-    // Fetch data user dari backend
-    fetch("/api/auth/me", {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then(res => res.json())
-      .then(data => setUser(data.user))
-      .catch(() => setErrorMessage("Gagal memuat data user"));
+    // Get user data from localStorage
+    const userDataStr = localStorage.getItem("user");
+    if (userDataStr) {
+      const userData = JSON.parse(userDataStr);
+      
+      // Fetch full user data from database
+      fetch(`/api/auth/profile?npm=${userData.npm}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.user) {
+            setUser(data.user);
+          } else {
+            // Fallback to localStorage data
+            setUser(userData);
+          }
+        })
+        .catch(() => {
+          // Fallback to localStorage data
+          setUser(userData);
+          setErrorMessage("Gagal memuat data dari database, menggunakan data lokal");
+        });
+    } else {
+      router.replace("/login");
+    }
   }, [router]);
 
   const handleLogout = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    localStorage.removeItem("token");
-    router.replace("/login");
+    localStorage.clear();
+    router.replace("/");
   };
 
   const handlePasswordChange = async (data: { oldPassword: string; newPassword: string; confirmPassword: string }) => {
     const token = localStorage.getItem("token");
-    if (!token) throw new Error("User tidak login");
+    const userDataStr = localStorage.getItem("user");
+    
+    if (!token || !userDataStr) throw new Error("User tidak login");
+
+    const userData = JSON.parse(userDataStr);
 
     const res = await fetch("/api/auth/change-password", {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-      body: JSON.stringify(data),
+      body: JSON.stringify({
+        ...data,
+        npm: userData.npm
+      }),
     });
 
     if (!res.ok) {
       const errData = await res.json();
-      throw new Error(errData.message || "Gagal mengubah password");
+      throw new Error(errData.error || "Gagal mengubah password");
     }
 
     setSuccessMessage("Password berhasil diubah");

@@ -16,7 +16,8 @@ const Dashboard: React.FC<DashboardProps> = ({ totalArsip, totalArsipHariIni, ar
   const router = useRouter(); // Menggunakan router Next.js untuk pengalihan
 
   const handleLogout = () => {
-    router.push('/'); // Balik ke halaman landing page setelah logout
+    localStorage.clear();
+    router.push('/');
   };
 
   return (

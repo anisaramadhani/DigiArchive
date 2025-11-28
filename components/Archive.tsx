@@ -12,6 +12,8 @@ interface ArchiveItem {
   file_asli?: string;
   fileUrl?: string;
   tanggal_upload?: string;
+  fileName?: string; // Nama file asli
+  fileType?: string; // Tipe file asli
 }
 
 interface ArchiveProps {
@@ -38,6 +40,7 @@ const Archive: React.FC<ArchiveProps> = ({
   const [showModal, setShowModal] = useState<boolean>(false);
   const [showDetail, setShowDetail] = useState<boolean>(false);
   const [showEdit, setShowEdit] = useState<boolean>(false);
+  const [showImagePreview, setShowImagePreview] = useState<boolean>(false);
   const [selectedArchive, setSelectedArchive] = useState<ArchiveItem | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<ArchiveItem | null>(null);
 
@@ -75,7 +78,7 @@ const Archive: React.FC<ArchiveProps> = ({
         <div className="sidebar-nav">
           <Link href="/dashboard" className="nav-item"><i className="fa-solid fa-layer-group"></i> Dashboard</Link>
           <Link href="/tambah-dokumen" className="nav-item"><i className="fa fa-camera"></i> Tambah Dokumen</Link>
-          <Link href="/archive" className="nav-item active"><i className="fas fa-folder-open"></i> Daftar Arsip</Link>
+          <Link href="/arsip" className="nav-item active"><i className="fas fa-folder-open"></i> Daftar Arsip</Link>
           <Link href="/recycle-bin" className="nav-item"><i className="fas fa-trash"></i> Recycle Bin</Link>
           <Link href="/profile" className="nav-item"><i className="fas fa-user"></i> Profile</Link>
         </div>
@@ -162,9 +165,12 @@ const Archive: React.FC<ArchiveProps> = ({
                         </span>
                       </td>
                       <td>
-                        <a href={archive.fileUrl} className="file-link" target="_blank" rel="noreferrer">
-                          <i className="fas fa-file"></i> {archive.file_asli || archive.file}
-                        </a>
+                        <button 
+                          onClick={() => { setSelectedArchive(archive); setShowImagePreview(true); }}
+                          className="file-link"
+                        >
+                          <i className="fas fa-file-alt"></i> {archive.fileName || archive.file_asli || archive.file || 'file'}
+                        </button>
                       </td>
                       <td>{archive.tanggal_upload}</td>
                       <td>
@@ -320,6 +326,60 @@ const Archive: React.FC<ArchiveProps> = ({
                 <button type="submit" className="btn-primary"><i className="fas fa-save"></i> Simpan</button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Preview Image */}
+      {showImagePreview && selectedArchive && (
+        <div className={`modal-overlay active`}>
+          <div className="modal-content" style={{ maxWidth: '800px' }}>
+            <div className="modal-header">
+              <h2 className="modal-title">Preview Dokumen</h2>
+              <button className="modal-close" onClick={() => setShowImagePreview(false)}><i className="fas fa-times"></i></button>
+            </div>
+            <div className="modal-body" style={{ padding: '1rem' }}>
+              <div style={{ marginBottom: '1rem' }}>
+                <strong>Judul:</strong> {selectedArchive.judul}
+              </div>
+              <div style={{ marginBottom: '1rem' }}>
+                <strong>Kategori:</strong> {selectedArchive.kategori}
+              </div>
+              <div style={{ textAlign: 'center' }}>
+                {/* Cek tipe file untuk preview yang sesuai */}
+                {selectedArchive.fileType?.startsWith('image/') ? (
+                  <img 
+                    src={selectedArchive.fileUrl} 
+                    alt={selectedArchive.judul}
+                    style={{ maxWidth: '100%', maxHeight: '500px', borderRadius: '8px', border: '1px solid #ddd' }}
+                  />
+                ) : selectedArchive.fileType === 'application/pdf' ? (
+                  <iframe
+                    src={selectedArchive.fileUrl}
+                    style={{ width: '100%', height: '500px', border: '1px solid #ddd', borderRadius: '8px' }}
+                    title="PDF Preview"
+                  />
+                ) : (
+                  <div style={{ padding: '3rem', textAlign: 'center', background: '#f8fafc', borderRadius: '8px', border: '1px solid #ddd' }}>
+                    <i className="fas fa-file" style={{ fontSize: '4rem', color: '#94a3b8', marginBottom: '1rem' }}></i>
+                    <p style={{ color: '#64748b', marginBottom: '0.5rem' }}>Preview tidak tersedia untuk tipe file ini</p>
+                    <p style={{ color: '#94a3b8', fontSize: '0.9rem' }}>{selectedArchive.fileName || 'File'}</p>
+                    <p style={{ color: '#cbd5e1', fontSize: '0.85rem', marginTop: '0.5rem' }}>Silakan download file untuk melihat isinya</p>
+                  </div>
+                )}
+              </div>
+            </div>
+            <div className="modal-actions">
+              <button className="btn-cancel" onClick={() => setShowImagePreview(false)}>Tutup</button>
+              <a 
+                href={selectedArchive.fileUrl} 
+                download={selectedArchive.fileName || selectedArchive.file_asli || 'dokumen'}
+                className="btn-primary"
+                style={{ textDecoration: 'none', display: 'inline-block' }}
+              >
+                <i className="fas fa-download"></i> Download
+              </a>
+            </div>
           </div>
         </div>
       )}

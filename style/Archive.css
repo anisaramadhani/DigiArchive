@@ -189,9 +189,9 @@ body {
 .btn-primary {
     background: linear-gradient(135deg, var(--primary), var(--primary-dark));
     color: #fff;
-    border: none;
-    border-radius: 25px;
-    padding: 0.8rem 2rem;
+    border: none !important;
+    border-radius: 25px !important;
+    padding: 0.7rem 1.8rem;
     font-weight: 600;
     font-size: 1rem;
     cursor: pointer;
@@ -317,11 +317,14 @@ body {
     font-weight: 500;
     display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 1rem;
+    gap: 0.6rem;
+    padding: 0.6rem 1.2rem;
     border-radius: 20px;
     background: var(--accent2);
     transition: all 0.3s;
+    border: none;
+    cursor: pointer;
+    font-size: 0.9rem;
 }
 
 .file-link:hover {
@@ -405,8 +408,8 @@ body {
 .modal-content {
     background: #fff;
     border-radius: 20px;
-    padding: 2.5rem;
-    max-width: 500px;
+    padding: 2rem;
+    max-width: 480px;
     width: 90%;
     max-height: 90vh;
     overflow-y: auto;
@@ -423,12 +426,13 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
+    background: transparent;
 }
 
 .modal-title {
-    font-size: 1.8rem;
-    color: var(--text-dark);
+    font-size: 1.6rem;
+    color: #1f2937;
     font-weight: 700;
 }
 
@@ -460,42 +464,42 @@ body {
 }
 
 .form-group {
-    margin-bottom: 1.5rem;
+    margin-bottom: 1.2rem;
 }
 
 .form-label {
     display: block;
-    margin-bottom: 0.8rem;
+    margin-bottom: 0.6rem;
     font-weight: 600;
-    color: var(--text-dark);
-    font-size: 1rem;
+    color: #1f2937;
+    font-size: 0.95rem;
 }
 
 .form-select {
     width: 100%;
-    padding: 1rem 1.5rem;
-    border: 2px solid var(--border);
-    border-radius: 15px;
-    font-size: 1rem;
+    padding: 0.85rem 1.2rem;
+    border: 1px solid #d1d5db;
+    border-radius: 10px;
+    font-size: 0.95rem;
     outline: none;
     transition: all 0.3s;
     appearance: none;
     -webkit-appearance: none;
     -moz-appearance: none;
-    background: #fff url("data:image/svg+xml,%3Csvg width='16' height='16' fill='gray' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M4 6l4 4 4-4' stroke='%235b7cfa' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 1.2rem center/1.1em;
+    background: #fff url("data:image/svg+xml,%3Csvg width='16' height='16' fill='gray' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M4 6l4 4 4-4' stroke='%236b7280' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 1rem center/1em;
     color: var(--text-dark);
 }
 
 .form-input {
     width: 100%;
-    padding: 1rem 1.5rem;
-    border: 2px solid var(--border);
-    border-radius: 15px;
-    font-size: 1rem;
+    padding: 0.85rem 1.2rem;
+    border: 1px solid #d1d5db;
+    border-radius: 10px;
+    font-size: 0.95rem;
     outline: none;
     transition: all 0.3s;
     background: #fff;
-    
+    color: #1f2937;
 }
 
 .form-input:focus, .form-select:focus {
@@ -504,9 +508,57 @@ body {
 }
 
 .file-input {
-    padding: 0.8rem 1rem;
-    background: var(--accent2);
-    border: 2px dashed var(--primary);
+    padding: 0.85rem 1.2rem !important;
+    background: #f9fafb !important;
+    border: 2px dashed #5b7cfa !important;
+    border-radius: 10px !important;
+    cursor: pointer;
+}
+
+.modal-body {
+    margin-bottom: 0.5rem;
+}
+
+.modal-body .form-group {
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.modal-body .form-group:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.modal-body .form-group label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #6b7280;
+    margin-bottom: 0.4rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.modal-body .form-group div {
+    font-size: 0.95rem;
+    color: #1f2937;
+    font-weight: 500;
+}
+
+.modal-body .form-group a {
+    color: #5b7cfa;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.modal-body .form-group a:hover {
+    color: #4256b8;
+    text-decoration: underline;
 }
 
 .modal-actions {
@@ -518,11 +570,12 @@ body {
 
 .btn-cancel {
     background: transparent;
-    color: var(--primary);
-    border: 2px solid var(--primary);
+    color: #5b7cfa;
+    border: 2px solid #5b7cfa;
     border-radius: 25px;
-    padding: 0.8rem 2rem;
+    padding: 0.7rem 1.8rem;
     font-weight: 600;
+    font-size: 0.95rem;
     cursor: pointer;
     transition: all 0.3s;
 }

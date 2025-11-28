@@ -61,6 +61,14 @@ body {
     font-weight: bold;
     color: var(--primary-dark);
     text-decoration: none;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+}
+
+.logo:hover {
+    opacity: 0.8;
 }
 
 .logo i {
@@ -134,14 +142,16 @@ body {
     box-shadow: 0 4px 15px rgba(91,124,250,0.18);
 }
 
-.btn-primary {
+/* Spesifik untuk Landing page saja */
+.navbar .btn-primary,
+.hero .btn-primary {
     background: linear-gradient(135deg, var(--primary), var(--primary-dark));
     color: white;
-    border: 2px solid transparent;
-    
+    border: none;
 }
 
-.btn-primary:hover {
+.navbar .btn-primary:hover,
+.hero .btn-primary:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 15px rgba(91,124,250,0.18);
 }

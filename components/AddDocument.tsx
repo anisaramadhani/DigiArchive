@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link"; // Menggunakan Link dari next/link untuk navigasi
+import Link from "next/link"; 
 import '../style/AddDocument.css';
 
 export default function AddDocument() {
@@ -9,14 +9,15 @@ export default function AddDocument() {
   const [photoDataUrl, setPhotoDataUrl] = useState<string>('');  
   const [error, setError] = useState<string>(''); 
   const [successMessage, setSuccessMessage] = useState<string>('');
-  const [selectedCategory, setSelectedCategory] = useState<string>('Kategori');
+  const [selectedCategory, setSelectedCategory] = useState<string>('Lainnya');
+  const [title, setTitle] = useState<string>('');
   const router = useRouter();  
 
   // Fungsi untuk logout dan kembali ke landing page
   const handleLogout = () => {
-    localStorage.clear(); 
-    sessionStorage.clear(); 
-    router.push('/'); 
+    localStorage.clear();
+    sessionStorage.clear();
+    router.push('/');
   };
 
   const categories = ['Proposal', 'Keuangan', 'Rapat', 'Surat', 'Lainnya'];
@@ -82,14 +83,29 @@ export default function AddDocument() {
       return;
     }
 
+    if (!title.trim()) {
+      setError("Judul dokumen harus diisi");
+      return;
+    }
+
+    // Get user data
+    const userDataStr = localStorage.getItem('user');
+    if (!userDataStr) {
+      setError("User tidak ditemukan. Silakan login kembali.");
+      return;
+    }
+
+    const userData = JSON.parse(userDataStr);
+
     try {
       const res = await fetch("/api/documents/add", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          title: "Judul dokumen",
+          title: title,
           category: selectedCategory,
           image: photoDataUrl,
+          npm: userData.npm,
         }),
       });
 
@@ -97,8 +113,12 @@ export default function AddDocument() {
       if (res.ok) {
         setSuccessMessage("Dokumen berhasil disimpan!");
         setPhotoDataUrl("");
+        setTitle("");
+        setSelectedCategory("Lainnya");
         stopCamera();
-        // Tidak redirect lagi
+        
+        // Clear success message after 3 seconds
+        setTimeout(() => setSuccessMessage(""), 3000);
       } else {
         setError(data.message || "Gagal menyimpan dokumen");
       }
@@ -140,7 +160,7 @@ export default function AddDocument() {
 
         <div className="content-card p-6">
           <div className="add-document-page p-0 bg-transparent">
-            <h2 className="text-2xl font-semibold mb-3">Tambah Dokumen (Foto)</h2>
+            <h2 className="text-2xl font-semibold mb-3">Tambah Dokumen</h2>
             <p className="text-sm text-gray-600 mb-4">Ambil foto dokumen langsung dari kamera atau unggah gambar.</p>
 
             <div className="add-document-controls">
@@ -169,13 +189,35 @@ export default function AddDocument() {
               <div>
                 <div className="preview-box">
                   {photoDataUrl ? (
-                    <img src={photoDataUrl} alt="preview" />
+                    <>
+                      <img src={photoDataUrl} alt="preview" />
+                      <button 
+                        className="cancel-photo-btn" 
+                        onClick={() => setPhotoDataUrl('')}
+                        title="Hapus foto dan ambil ulang"
+                      >
+                        <i className="fas fa-times"></i> Batal
+                      </button>
+                    </>
                   ) : (
                     <div className="text-gray-400 text-center">Preview foto akan muncul di sini</div>
                   )}
                 </div>
 
+                <div className="form-row" style={{ marginBottom: '1rem' }}>
+                  <label className="text-sm font-semibold">Judul Dokumen:</label>
+                  <input 
+                    type="text" 
+                    value={title} 
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder="Masukkan Judul Dokumen"
+                    className="form-input"
+                    style={{ width: '100%', padding: '0.5rem', border: '1px solid #ddd', borderRadius: '4px' }}
+                  />
+                </div>
+
                 <div className="form-row">
+                  <label className="text-sm font-semibold">Kategori:</label>
                   <select value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value)}>
                     {categories.map(c => <option key={c} value={c}>{c}</option>)}
                   </select>

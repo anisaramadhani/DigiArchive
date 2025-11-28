@@ -27,12 +27,68 @@ const RegisterForm = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validasi password
     if (formData.password !== formData.password_confirmation) {
-      setErrors(['Passwords do not match.']);
+      setErrors(['Password dan Konfirmasi Password tidak cocok']);
       return;
     }
+
+    if (formData.password.length < 8) {
+      setErrors(['Password minimal 8 karakter']);
+      return;
+    }
+
     setErrors([]);
-    router.push('/dashboard');
+
+    // Call register API
+    (async () => {
+      try {
+        const res = await fetch('/api/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            npm: formData.npm,
+            name: formData.nama,
+            email: formData.email,
+            password: formData.password,
+            jurusan: formData.jurusan,
+          }),
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          setErrors([data?.error || 'Registrasi gagal']);
+          return;
+        }
+
+        // Registrasi berhasil, langsung login
+        const loginRes = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            npm: formData.npm,
+            password: formData.password,
+          }),
+        });
+
+        const loginData = await loginRes.json();
+
+        if (loginRes.ok && loginData?.token) {
+          localStorage.setItem('token', loginData.token);
+          if (loginData?.user) {
+            localStorage.setItem('user', JSON.stringify(loginData.user));
+          }
+          router.push('/dashboard');
+        } else {
+          alert('Registrasi berhasil! Silakan login.');
+          router.push('/login');
+        }
+      } catch (err) {
+        setErrors(['Gagal terhubung ke server. Pastikan server berjalan.']);
+      }
+    })();
   };
 
   return (

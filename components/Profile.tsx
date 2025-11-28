@@ -72,7 +72,7 @@ const Profile: React.FC<ProfileProps> = ({
         <div className="sidebar-nav">
           <Link href="/dashboard" className="nav-item"><i className="fa-solid fa-layer-group"></i> Dashboard</Link>
           <Link href="/tambah-dokumen" className="nav-item"><i className="fa fa-camera"></i> Tambah Dokumen</Link>
-          <Link href="/archive" className="nav-item"><i className="fas fa-folder-open"></i> Daftar Arsip</Link>
+          <Link href="/arsip" className="nav-item"><i className="fas fa-folder-open"></i> Daftar Arsip</Link>
           <Link href="/recycle-bin" className="nav-item"><i className="fas fa-trash"></i> Recycle Bin</Link>
           <Link href="/profile" className="nav-item active"><i className="fas fa-user"></i> Profile</Link>
         </div>

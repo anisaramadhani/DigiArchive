@@ -35,7 +35,7 @@ const Login: React.FC = () => {
 
     setErrors([]);
 
-    // Call demo API route
+    // Call API route
     (async () => {
       try {
         const res = await fetch('/api/auth/login', {
@@ -47,17 +47,20 @@ const Login: React.FC = () => {
         const data = await res.json();
 
         if (!res.ok) {
-          setErrors([data?.error || 'Login failed']);
+          setErrors([data?.error || 'Login gagal']);
           return;
         }
 
-        // store demo token and redirect
+        // Store token and redirect
         if (data?.token) {
           localStorage.setItem('token', data.token);
+          if (data?.user) {
+            localStorage.setItem('user', JSON.stringify(data.user));
+          }
         }
         router.push('/dashboard');
       } catch (err) {
-        setErrors(['Network error']);
+        setErrors(['Gagal terhubung ke server. Pastikan server berjalan.']);
       }
     })();
   };
