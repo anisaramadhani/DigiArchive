@@ -83,93 +83,34 @@ export default function AddDocument() {
       return;
     }
 
-<<<<<<< HEAD
     try {
-      const res = await fetch("/api/documents/add", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: "Judul dokumen",
-          category: selectedCategory,
-          image: photoDataUrl,
-        }),
-      });
-=======
-  if (!photoDataUrl) {
-    setError('Ambil foto atau unggah gambar terlebih dahulu');
-    return;
-  }
+      // Prepare payload to save to localStorage (frontend-only)
+      const payload = {
+        title: title || `Dokumen ${new Date().toLocaleString()}`,
+        category: selectedCategory === 'Kategori' ? 'Lainnya' : selectedCategory,
+        image: photoDataUrl,
+      };
 
-  try {
-    // Prepare payload to send to server
-    const payload = {
-      title: title || `Dokumen ${new Date().toLocaleString()}`,
-      category: selectedCategory === 'Kategori' ? 'Lainnya' : selectedCategory,
-      image: photoDataUrl,
-    };
+      const storeKey = 'digiarchive_local_arsip';
+      const existing = JSON.parse(localStorage.getItem(storeKey) || '[]');
+      const item = {
+        id: Date.now(),
+        title: payload.title,
+        category: payload.category,
+        image: payload.image,
+        createdAt: new Date().toISOString(),
+        _savedToServer: false,
+      };
+      existing.unshift(item);
+      localStorage.setItem(storeKey, JSON.stringify(existing));
 
-    const userId = localStorage.getItem('userId') || undefined;
-
-    // Try to save to server; fallback to localStorage if server fails
-    fetch('/api/documents/add', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(userId ? { 'x-user-id': userId } : {}),
-      },
-      body: JSON.stringify(payload),
-    })
-      .then(async (res) => {
-        if (!res.ok) {
-          const txt = await res.text().catch(() => '');
-          throw new Error(txt || `Server returned ${res.status}`);
-        }
-        return res.json();
-      })
-      .then((data) => {
-        setPhotoDataUrl('');
-        stopCamera();
-        setTitle('');
-        setSuccessMessage('Dokumen berhasil disimpan ke server!');
-      })
-      .catch((err) => {
-        console.warn('API save failed, fallback to localStorage:', err);
-        const storeKey = 'digiarchive_local_arsip';
-        const existing = JSON.parse(localStorage.getItem(storeKey) || '[]');
-        const item = {
-          id: Date.now(),
-          title: title || `Dokumen ${new Date().toLocaleString()}`,
-          category: selectedCategory,
-          image: photoDataUrl,
-          createdAt: new Date().toISOString(),
-          _savedToServer: false,
-        };
-        existing.unshift(item);
-        localStorage.setItem(storeKey, JSON.stringify(existing));
-
-        setPhotoDataUrl('');
-        stopCamera();
-        setTitle('');
-        setSuccessMessage('Dokumen disimpan secara lokal (offline).');
-      });
-  } catch (err) {
-    console.error(err);
-    setError('Gagal menyimpan dokumen.');
-  }
-};
->>>>>>> 3720c41f7b6f9f816a147b70cea4b23939feb66f
-
-      const data = await res.json();
-      if (res.ok) {
-        setSuccessMessage("Dokumen berhasil disimpan!");
-        setPhotoDataUrl("");
-        stopCamera();
-        // Tidak redirect lagi
-      } else {
-        setError(data.message || "Gagal menyimpan dokumen");
-      }
+      setPhotoDataUrl('');
+      stopCamera();
+      setTitle('');
+      setSuccessMessage('Dokumen berhasil disimpan secara lokal!');
     } catch (err) {
-      setError("Terjadi kesalahan server");
+      console.error(err);
+      setError('Gagal menyimpan dokumen.');
     }
   };
 

@@ -1,68 +1,87 @@
 "use client";
-import React, { useState, FormEvent, ChangeEvent } from "react";
+import React, { useState, FormEvent, ChangeEvent, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import "../style/Archive.css";
 
 interface ArchiveItem {
   id: string | number;
-  judul: string;
-  kategori: string;
-  file?: string;
-  file_asli?: string;
-  fileUrl?: string;
-  tanggal_upload?: string;
+  title: string;
+  category: string;
+  image: string;
+  createdAt: string;
 }
 
-interface ArchiveProps {
-  archives?: ArchiveItem[];
-  success?: string;
-  errors?: string[];
-  onLogout?: () => void;
-  onAddArchive?: (form: FormData) => void;
-  onDeleteArchive?: (id: string | number) => void;
-  onUpdateArchive?: (id: string | number, form: FormData) => void;
-}
-
-const Archive: React.FC<ArchiveProps> = ({
-  archives = [],
-  success,
-  errors = [],
-  onLogout,
-  onAddArchive,
-  onDeleteArchive,
-  onUpdateArchive,
-}) => {
+const Archive: React.FC = () => {
+  const [archives, setArchives] = useState<ArchiveItem[]>([]);
   const [search, setSearch] = useState<string>("");
   const [kategori, setKategori] = useState<string>("");
   const [showModal, setShowModal] = useState<boolean>(false);
   const [showDetail, setShowDetail] = useState<boolean>(false);
-  const [showEdit, setShowEdit] = useState<boolean>(false);
   const [selectedArchive, setSelectedArchive] = useState<ArchiveItem | null>(null);
-  const [deleteTarget, setDeleteTarget] = useState<ArchiveItem | null>(null);
 
   const router = useRouter();
 
+  // Load arsip dari localStorage saat component mount
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem('digiarchive_local_arsip') || '[]';
+      const docs = JSON.parse(raw) as ArchiveItem[];
+      setArchives(docs || []);
+    } catch (err) {
+      console.error('Error loading archives:', err);
+    }
+  }, []);
+
   const handleLogout = () => {
-    if (onLogout) onLogout();
+    localStorage.removeItem("currentUser");
+    localStorage.removeItem("token");
     router.push("/");
   };
 
   const handleAdd = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const form = new FormData(e.currentTarget);
-    if (onAddArchive) onAddArchive(form);
+    const formData = new FormData(e.currentTarget);
+    
+    // Untuk sekarang, arahkan ke halaman tambah dokumen
+    // Karena arsip ditambah melalui kamera di halaman tambah dokumen
     setShowModal(false);
+    router.push("/tambah-dokumen");
   };
 
-  const handleEdit = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const form = new FormData(e.currentTarget);
-    if (onUpdateArchive && selectedArchive) {
-      onUpdateArchive(selectedArchive.id, form);
+  const handleDelete = (id: string | number) => {
+    try {
+      const itemToDelete = archives.find(a => a.id === id);
+      if (!itemToDelete) return;
+
+      // Pindahkan ke recycle bin (soft delete) - simpan tanpa image untuk hemat storage
+      const recycleBin = JSON.parse(localStorage.getItem('digiarchive_recycle_bin') || '[]');
+      recycleBin.push({
+        id: itemToDelete.id,
+        title: itemToDelete.title,
+        category: itemToDelete.category,
+        createdAt: itemToDelete.createdAt,
+        deletedAt: new Date().toISOString()
+        // Jangan simpan image di recycle bin untuk hemat storage
+      });
+      localStorage.setItem('digiarchive_recycle_bin', JSON.stringify(recycleBin));
+
+      // Hapus dari arsip
+      const updated = archives.filter(a => a.id !== id);
+      setArchives(updated);
+      localStorage.setItem('digiarchive_local_arsip', JSON.stringify(updated));
+    } catch (err) {
+      console.error('Error deleting archive:', err);
+      alert('Gagal menghapus arsip. Storage mungkin penuh.');
     }
-    setShowEdit(false);
   };
+
+  const filteredArchives = archives.filter(archive => {
+    const matchSearch = archive.title.toLowerCase().includes(search.toLowerCase()) || 
+                       archive.category.toLowerCase().includes(search.toLowerCase());
+    const matchCategory = !kategori || archive.category === kategori;
+    return matchSearch && matchCategory;
+  });
 
   return (
     <div className="app">
@@ -96,24 +115,15 @@ const Archive: React.FC<ArchiveProps> = ({
         <div className="content-card">
           <div className="archive-header">
             <h2>Manajemen Arsip</h2>
-            <button className="btn-primary" onClick={() => setShowModal(true)}>
-              <i className="fas fa-plus"></i> Tambah Arsip
+            <button className="btn-primary" onClick={() => router.push('/tambah-dokumen')}>
+              <i className="fas fa-plus"></i> Tambah Dokumen
             </button>
           </div>
 
-          {/* Alerts */}
-          {success && (
-            <div style={{ background: "#e8f5e8", color: "#27ae60", padding: "10px 20px", borderRadius: "8px", marginBottom: "1rem" }}>
-              {success}
-            </div>
-          )}
-          {errors.length > 0 && (
-            <div style={{ background: "#f8d7da", color: "#dc3545", padding: "10px 20px", borderRadius: "8px", marginBottom: "1rem" }}>
-              <ul style={{ margin: 0, paddingLeft: "1.2em" }}>
-                {errors.map((err, i) => <li key={i}>{err}</li>)}
-              </ul>
-            </div>
-          )}
+          {/* Info */}
+          <div style={{ background: "#e3f2fd", color: "#1976d2", padding: "10px 20px", borderRadius: "8px", marginBottom: "1rem" }}>
+            💡 Semua arsip disimpan secara lokal di perangkat ini. Data akan hilang jika cache browser dihapus.
+          </div>
 
           {/* Search */}
           <div className="search-container">
@@ -143,30 +153,29 @@ const Archive: React.FC<ArchiveProps> = ({
               <thead>
                 <tr>
                   <th>No</th>
-                  <th>Judul Arsip</th>
+                  <th>Judul</th>
                   <th>Kategori</th>
-                  <th>File/Foto</th>
-                  <th>Tanggal Upload</th>
+                  <th>Preview</th>
+                  <th>Tanggal</th>
                   <th>Aksi</th>
                 </tr>
               </thead>
               <tbody>
-                {archives.length > 0 ? (
-                  archives.map((archive, index) => (
+                {filteredArchives.length > 0 ? (
+                  filteredArchives.map((archive, index) => (
                     <tr key={archive.id}>
                       <td>{index + 1}</td>
-                      <td>{archive.judul}</td>
+                      <td>{archive.title}</td>
                       <td>
-                        <span className={`category-badge category-${archive.kategori?.toLowerCase()}`}>
-                          {archive.kategori}
+                        <span className={`category-badge category-${archive.category?.toLowerCase()}`}>
+                          {archive.category}
                         </span>
                       </td>
                       <td>
-                        <a href={archive.fileUrl} className="file-link" target="_blank" rel="noreferrer">
-                          <i className="fas fa-file"></i> {archive.file_asli || archive.file}
-                        </a>
+                        <img src={archive.image} alt={archive.title} style={{ maxWidth: '50px', maxHeight: '50px', cursor: 'pointer' }}
+                          onClick={() => { setSelectedArchive(archive); setShowDetail(true); }} />
                       </td>
-                      <td>{archive.tanggal_upload}</td>
+                      <td>{new Date(archive.createdAt).toLocaleDateString('id-ID')}</td>
                       <td>
                         <div className="action-buttons">
                           <button
@@ -178,15 +187,8 @@ const Archive: React.FC<ArchiveProps> = ({
                           </button>
                           <button
                             type="button"
-                            className="btn-action edit"
-                            onClick={() => { setSelectedArchive(archive); setShowEdit(true); }}
-                          >
-                            <i className="fas fa-edit"></i>
-                          </button>
-                          <button
-                            type="button"
                             className="btn-action delete"
-                            onClick={() => setDeleteTarget(archive)}
+                            onClick={() => handleDelete(archive.id)}
                           >
                             <i className="fas fa-trash"></i>
                           </button>
@@ -200,7 +202,7 @@ const Archive: React.FC<ArchiveProps> = ({
                       <div className="empty-state">
                         <i className="fas fa-folder-open"></i>
                         <h3>Belum ada arsip ditemukan</h3>
-                        <p>Silakan tambah arsip baru atau ubah filter pencarian.</p>
+                        <p>Silakan tambah dokumen melalui halaman Tambah Dokumen.</p>
                       </div>
                     </td>
                   </tr>
@@ -211,43 +213,6 @@ const Archive: React.FC<ArchiveProps> = ({
         </div>
       </main>
 
-      {/* Modal Tambah Arsip */}
-      {showModal && (
-        <div className={`modal-overlay ${showModal ? 'active' : ''}`}>
-          <div className="modal-content">
-            <div className="modal-header">
-              <h2 className="modal-title">Tambah Arsip</h2>
-              <button className="modal-close" onClick={() => setShowModal(false)}><i className="fas fa-times"></i></button>
-            </div>
-            <form onSubmit={handleAdd}>
-              <div className="form-group">
-                <label className="form-label">Judul Arsip</label>
-                <input type="text" className="form-input" name="judul" required />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Kategori</label>
-                <select className="form-select" name="kategori" required>
-                  <option value="">Pilih Kategori</option>
-                  <option value="Proposal">Proposal</option>
-                  <option value="Keuangan">Keuangan</option>
-                  <option value="Rapat">Rapat</option>
-                  <option value="Surat">Surat</option>
-                  <option value="Lainnya">Lainnya</option>
-                </select>
-              </div>
-              <div className="form-group">
-                <label className="form-label">Upload File/Foto</label>
-                <input type="file" className="form-input file-input" name="file" required />
-              </div>
-              <div className="modal-actions">
-                <button type="button" className="btn-cancel" onClick={() => setShowModal(false)}>Batal</button>
-                <button type="submit" className="btn-primary"><i className="fas fa-save"></i> Simpan</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
       {/* Modal Detail Arsip */}
       {showDetail && selectedArchive && (
         <div className={`modal-overlay ${showDetail ? 'active' : ''}`}>
@@ -257,69 +222,28 @@ const Archive: React.FC<ArchiveProps> = ({
               <button className="modal-close" onClick={() => setShowDetail(false)}><i className="fas fa-times"></i></button>
             </div>
             <div className="modal-body">
-              <div className="form-group"><label>Judul Arsip</label><div>{selectedArchive.judul}</div></div>
-              <div className="form-group"><label>Kategori</label><div>{selectedArchive.kategori}</div></div>
-              <div className="form-group"><label>File/Foto</label><div><a href={selectedArchive.fileUrl} target="_blank" rel="noreferrer">{selectedArchive.file}</a></div></div>
-              <div className="form-group"><label>Tanggal Upload</label><div>{selectedArchive.tanggal_upload}</div></div>
+              <div className="form-group">
+                <label>Judul</label>
+                <div>{selectedArchive.title}</div>
+              </div>
+              <div className="form-group">
+                <label>Kategori</label>
+                <div>{selectedArchive.category}</div>
+              </div>
+              <div className="form-group">
+                <label>Preview</label>
+                <div>
+                  <img src={selectedArchive.image} alt={selectedArchive.title} style={{ maxWidth: '100%', borderRadius: '8px' }} />
+                </div>
+              </div>
+              <div className="form-group">
+                <label>Tanggal</label>
+                <div>{new Date(selectedArchive.createdAt).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' })}</div>
+              </div>
             </div>
             <div className="modal-actions">
               <button className="btn-cancel" onClick={() => setShowDetail(false)}>Tutup</button>
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* Modal Konfirmasi Hapus */}
-      {deleteTarget && (
-        <div className={`modal-overlay active`}>
-          <div className="modal-content">
-            <div className="modal-header">
-              <h2 className="modal-title">Hapus Arsip</h2>
-              <button className="modal-close" onClick={() => setDeleteTarget(null)}><i className="fas fa-times"></i></button>
-            </div>
-            <div className="modal-body">
-              <p>Yakin ingin menghapus arsip "{deleteTarget.judul}"? Aksi ini akan memindahkan arsip ke Recycle Bin.</p>
-            </div>
-            <div className="modal-actions">
-              <button className="btn-cancel" onClick={() => setDeleteTarget(null)}>Batal</button>
-              <button className="btn-primary" onClick={() => { if (onDeleteArchive) onDeleteArchive(deleteTarget.id); setDeleteTarget(null); }}>Yakin</button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Modal Edit Arsip */}
-      {showEdit && selectedArchive && (
-        <div className={`modal-overlay ${showEdit ? 'active' : ''}`}>
-          <div className="modal-content">
-            <div className="modal-header">
-              <h2 className="modal-title">Edit Arsip</h2>
-              <button className="modal-close" onClick={() => setShowEdit(false)}><i className="fas fa-times"></i></button>
-            </div>
-            <form onSubmit={handleEdit}>
-              <div className="form-group">
-                <label className="form-label">Judul Arsip</label>
-                <input type="text" className="form-input" name="judul" defaultValue={selectedArchive.judul} required />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Kategori</label>
-                <select className="form-select" name="kategori" defaultValue={selectedArchive.kategori} required>
-                  <option value="Proposal">Proposal</option>
-                  <option value="Keuangan">Keuangan</option>
-                  <option value="Rapat">Rapat</option>
-                  <option value="Surat">Surat</option>
-                  <option value="Lainnya">Lainnya</option>
-                </select>
-              </div>
-              <div className="form-group">
-                <label className="form-label">File/Foto (opsional)</label>
-                <input type="file" className="form-input file-input" name="file" />
-              </div>
-              <div className="modal-actions">
-                <button type="button" className="btn-cancel" onClick={() => setShowEdit(false)}>Batal</button>
-                <button type="submit" className="btn-primary"><i className="fas fa-save"></i> Simpan</button>
-              </div>
-            </form>
           </div>
         </div>
       )}

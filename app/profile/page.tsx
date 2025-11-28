@@ -19,44 +19,55 @@ export default function ProfilePage() {
   const [errorMessage, setErrorMessage] = useState<string>("");
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      router.replace("/login"); // redirect ke login jika token tidak ada
+    const userData = localStorage.getItem("currentUser");
+    if (!userData) {
+      router.replace("/login");
       return;
     }
 
-    // Fetch data user dari backend
-    fetch("/api/auth/me", {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then(res => res.json())
-      .then(data => setUser(data.user))
-      .catch(() => setErrorMessage("Gagal memuat data user"));
+    try {
+      setUser(JSON.parse(userData));
+    } catch {
+      setErrorMessage("Gagal memuat data user");
+    }
   }, [router]);
 
   const handleLogout = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    localStorage.removeItem("currentUser");
     localStorage.removeItem("token");
     router.replace("/login");
   };
 
   const handlePasswordChange = async (data: { oldPassword: string; newPassword: string; confirmPassword: string }) => {
-    const token = localStorage.getItem("token");
-    if (!token) throw new Error("User tidak login");
+    const userData = localStorage.getItem("currentUser");
+    if (!userData) throw new Error("User tidak login");
 
-    const res = await fetch("/api/auth/change-password", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-      body: JSON.stringify(data),
-    });
+    try {
+      const user = JSON.parse(userData);
+      
+      // Check old password
+      if (user.password !== data.oldPassword) {
+        throw new Error("Password lama tidak sesuai");
+      }
 
-    if (!res.ok) {
-      const errData = await res.json();
-      throw new Error(errData.message || "Gagal mengubah password");
+      // Update password
+      user.password = data.newPassword;
+      localStorage.setItem("currentUser", JSON.stringify(user));
+      
+      // Update di users list
+      const users = JSON.parse(localStorage.getItem("digiarchive_users") || "[]");
+      const userIdx = users.findIndex((u: any) => u.email === user.email);
+      if (userIdx !== -1) {
+        users[userIdx].password = data.newPassword;
+        localStorage.setItem("digiarchive_users", JSON.stringify(users));
+      }
+
+      setSuccessMessage("Password berhasil diubah");
+      setErrorMessage("");
+    } catch (err) {
+      setErrorMessage(err instanceof Error ? err.message : "Gagal mengubah password");
     }
-
-    setSuccessMessage("Password berhasil diubah");
-    setErrorMessage("");
   };
 
   return (

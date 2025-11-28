@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Clear localStorage</title>
+</head>
+<body>
+    <h1>Clearing localStorage...</h1>
+    <p id="status">Clearing...</p>
+    <script>
+        try {
+            const keys = Object.keys(localStorage);
+            const originalSize = JSON.stringify(localStorage).length;
+            
+            // Hapus semua data digiarchive
+            keys.forEach(key => {
+                if (key.startsWith('digiarchive_')) {
+                    localStorage.removeItem(key);
+                }
+            });
+            
+            const newSize = JSON.stringify(localStorage).length;
+            document.getElementById('status').innerHTML = `
+                <strong style="color: green;">✓ Success!</strong><br>
+                Cleared ${keys.filter(k => k.startsWith('digiarchive_')).length} items<br>
+                Storage freed: ~${Math.round((originalSize - newSize) / 1024)}KB
+            `;
+            
+            console.log('localStorage cleared successfully');
+        } catch (err) {
+            document.getElementById('status').innerHTML = `<strong style="color: red;">✗ Error:</strong> ${err.message}`;
+            console.error(err);
+        }
+        
+        // Redirect after 3 seconds
+        setTimeout(() => {
+            window.location.href = 'http://localhost:3000';
+        }, 3000);
+    </script>
+</body>
+</html>

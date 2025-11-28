@@ -47,32 +47,36 @@ const RegisterForm = () => {
     setLoading(true);
     setErrors([]);
 
+    // Simpan data ke localStorage (frontend-only)
     try {
-      const res = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          nama: formData.nama,
-          email: formData.email,
-          npm: formData.npm,
-          jurusan: formData.jurusan,
-          password: formData.password,
-          password_confirmation: formData.password_confirmation,
-        }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        setErrors([data?.message || 'Registrasi gagal']);
+      const users = JSON.parse(localStorage.getItem('digiarchive_users') || '[]');
+      
+      // Cek email sudah terdaftar
+      if (users.some((u: any) => u.email === formData.email)) {
+        setErrors(['Email sudah terdaftar']);
+        setLoading(false);
+        return;
+      }
+      
+      // Cek NPM sudah terdaftar
+      if (users.some((u: any) => u.npm === formData.npm)) {
+        setErrors(['NPM sudah terdaftar']);
+        setLoading(false);
         return;
       }
 
-      // Registrasi berhasil, redirect ke login
+      // Simpan user baru
+      const newUser = {
+        id: Date.now(),
+        ...formData
+      };
+      users.push(newUser);
+      localStorage.setItem('digiarchive_users', JSON.stringify(users));
+
       alert('Pendaftaran berhasil! Silakan login dengan akun Anda.');
       router.push('/login');
     } catch (err) {
-      setErrors(['Terjadi kesalahan network']);
+      setErrors(['Terjadi kesalahan saat menyimpan data']);
       console.error(err);
     } finally {
       setLoading(false);

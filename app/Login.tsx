@@ -33,27 +33,22 @@ const Login: React.FC = () => {
     setErrors([]);
 
     try {
-      const res = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ npm, password }),
-      });
+      // Cari user dari localStorage (frontend-only)
+      const users = JSON.parse(localStorage.getItem('digiarchive_users') || '[]');
+      const user = users.find((u: any) => u.npm === npm && u.password === password);
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        setErrors([data?.message || 'Login failed']);
+      if (!user) {
+        setErrors(['NPM atau Password salah']);
+        setLoading(false);
         return;
       }
 
-      // Simpan token dan user data
-      if (data?.token) {
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('user', JSON.stringify(data.user));
-      }
+      // Simpan current user dan token
+      localStorage.setItem('currentUser', JSON.stringify(user));
+      localStorage.setItem('token', `token_${Date.now()}`);
       router.push('/dashboard');
     } catch (err) {
-      setErrors(['Terjadi kesalahan network']);
+      setErrors(['Terjadi kesalahan saat login']);
       console.error(err);
     } finally {
       setLoading(false);
