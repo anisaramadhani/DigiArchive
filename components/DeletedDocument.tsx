@@ -61,7 +61,7 @@ const DeletedDocuments: React.FC<DeletedDocumentsProps> = ({ deletedDocs = [], o
         </div>
         <div className="sidebar-nav">
           <Link href="/dashboard" className="nav-item">
-            <i className="fa-solid fa-layer-group"></i> Dashboard
+            <i className="fa-solid fa-layer-group"></i> Beranda
           </Link>
           <Link href="/tambah-dokumen" className="nav-item">
             <i className="fa fa-camera"></i> Tambah Dokumen

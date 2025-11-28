@@ -34,7 +34,7 @@ const Dashboard: React.FC<DashboardProps> = ({ totalArsip, totalArsipHariIni, ar
           <div className="sidebar-nav flex flex-col mt-6">
             {/* Menggunakan Link untuk routing */}
             <Link href="/dashboard" className="nav-item active p-3 flex items-center gap-2 bg-indigo-600 rounded-md m-2">
-              <i className="fa-solid fa-layer-group"></i> Dashboard
+              <i className="fa-solid fa-layer-group"></i> Beranda
             </Link>
             <Link href="/tambah-dokumen" className="nav-item p-3 flex items-center gap-2 hover:bg-indigo-500 rounded-md m-2">
               <i className="fa fa-camera"></i> Tambah Dokumen
@@ -66,12 +66,12 @@ const Dashboard: React.FC<DashboardProps> = ({ totalArsip, totalArsipHariIni, ar
           <button className="menu-toggle text-xl">
             <i className="fas fa-bars"></i>
           </button>
-          <h1 className="page-title text-lg font-semibold">Dashboard</h1>
+          <h1 className="page-title text-lg font-semibold">Beranda</h1>
         </div>
 
         <div className="content-card p-6">
           <div className="archive-header mb-10">
-            <h2 className="text-2xl font-bold">Dashboard</h2>
+            <h2 className="text-2xl font-bold">Beranda</h2>
           </div>
 
           {/* Dashboard Cards */}
