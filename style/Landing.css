@@ -335,6 +335,44 @@ body::before {
     animation: fadeInUp 1s ease 0.4s both;
 }
 
+/* Typing animation */
+.typing-text {
+    display: block;
+    min-height: 5.4rem;
+    white-space: normal;
+    word-wrap: break-word;
+}
+
+.typing-text .cursor {
+    display: inline-block;
+    margin-left: 3px;
+    animation: blink 0.7s step-end infinite;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}
+
+/* Typing animation */
+.typing-text {
+    display: block;
+    min-height: 5.4rem;
+    white-space: normal;
+    word-wrap: break-word;
+}
+
+@keyframes typing {
+    0% { width: 0; }
+    50% { width: 100%; }
+    100% { width: 0; }
+}
+
+@keyframes blink {
+    0%, 100% { border-color: white; }
+    50% { border-color: transparent; }
+}
+
 .hero-buttons {
     display: flex;
     gap: 1.5rem;

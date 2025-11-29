@@ -1,5 +1,5 @@
 "use client";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import Head from 'next/head';
@@ -47,13 +47,44 @@ const Navbar: React.FC = () => {
 
 // Hero
 const Hero: React.FC = () => {
+  const [displayText, setDisplayText] = useState('');
+  const fullText = 'Sistem Pengelolaan Arsip Digital yang Mudah, Aman, dan Modern. Kelola semua dokumen penting Anda dengan teknologi terdepan.';
+  const typingSpeed = 30;
+
+  useEffect(() => {
+    let currentIndex = 0;
+    let timeoutId: NodeJS.Timeout;
+    
+    const typeWriter = () => {
+      if (currentIndex <= fullText.length) {
+        setDisplayText(fullText.substring(0, currentIndex));
+        currentIndex++;
+        timeoutId = setTimeout(typeWriter, typingSpeed);
+      } else {
+        // Reset dari awal setelah jeda
+        timeoutId = setTimeout(() => {
+          currentIndex = 0;
+          setDisplayText('');
+          typeWriter();
+        }, 2000);
+      }
+    };
+
+    typeWriter();
+
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, []);
+
   return (
     <section className="hero">
       <div className="hero-container">
         <div className="hero-content">
           <h1>Selamat Datang di DigiArchive</h1>
-          <p>
-            Sistem Pengelolaan Arsip Digital yang Mudah, Aman, dan Modern. Kelola semua dokumen penting Anda dengan teknologi terdepan.
+          <p className="typing-text">
+            {displayText}
+            <span className="cursor">|</span>
           </p>
           <div className="hero-buttons">
             <Link href="/register" className="btn btn-primary btn-hero">
