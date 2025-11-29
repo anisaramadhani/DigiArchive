@@ -1,16 +1,16 @@
 /* Reset & Base Styles */
 :root {
-  --primary: #6366f1;
-  --primary-dark: #4f46e5;
-  --primary-light: #818cf8;
-  --accent: #a78bfa;
-  --accent2: #c4b5fd;
+  --primary: #A65f0A;
+  --primary-dark: #8B4513;
+  --primary-light: #D38C9D;
+  --accent: #E2B4C1;
+  --accent2: #F7DAE7;
   --success: #10b981;
   --danger: #ef4444;
   --warning: #f59e0b;
   --info: #06b6d4;
-  --text-dark: #1e293b;
-  --text-light: #64748b;
+  --text-dark: #5a3a4a;
+  --text-light: #9b7b8b;
   --glass-bg: rgba(255, 255, 255, 0.25);
   --glass-border: rgba(255, 255, 255, 0.4);
   --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
