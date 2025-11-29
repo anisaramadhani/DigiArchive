@@ -140,14 +140,14 @@ const Team: React.FC = () => {
           <div className="team-card">
             <img src="/images/imageAnisa.png" alt="Anisa" className="team-photo" />
             <h3>Anisa Ramadhani</h3>
-            <p>Frontend Developer & UI/UX Designer</p>
+            <p>Backend Developer</p>
           </div>
 
           {/* Anggota Tim 2 */}
           <div className="team-card">
             <img src="/images/imageBunga.jpg" alt="Budi Santoso" className="team-photo" />
             <h3>Bunga Rasikhah Haya</h3>
-            <p>Backend Developer</p>
+            <p>Frontend Developer & UI/UX Designer</p>
           </div>
         </div>
       </div>
