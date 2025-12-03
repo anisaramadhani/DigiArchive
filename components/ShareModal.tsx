@@ -25,6 +25,8 @@ const ShareModal = ({ isOpen, onClose, documentId, documentName, sharedWith, onR
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState<'success' | 'error'>('success');
 
+  console.log('ShareModal rendered - isOpen:', isOpen, 'documentId:', documentId); // Debug
+
   useEffect(() => {
     if (!isOpen) {
       setNpm('');
@@ -40,6 +42,7 @@ const ShareModal = ({ isOpen, onClose, documentId, documentName, sharedWith, onR
       return;
     }
 
+    console.log('Sharing document:', { documentId, shareWithNpm: npm, permission }); // Debug
     setLoading(true);
     setMessage('');
 
@@ -59,6 +62,7 @@ const ShareModal = ({ isOpen, onClose, documentId, documentName, sharedWith, onR
       });
 
       const data = await response.json();
+      console.log('Share API response:', data); // Debug
 
       if (response.ok) {
         setMessage(data.message || 'Dokumen berhasil dibagikan');

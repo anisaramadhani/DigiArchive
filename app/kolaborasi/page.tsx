@@ -2,7 +2,6 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import ShareModal from '../../components/ShareModal';
 import '../../style/Archive.css';
 import '../../style/Kolaborasi.css';
 
@@ -23,12 +22,19 @@ const KolaborasiPage = () => {
   const router = useRouter();
   const [sharedDocs, setSharedDocs] = useState<SharedDocument[]>([]);
   const [myDocs, setMyDocs] = useState<any[]>([]);
-  const [activeTab, setActiveTab] = useState<'received' | 'share'>('received');
   const [loading, setLoading] = useState(false);
   const [userNpm, setUserNpm] = useState('');
   const [userName, setUserName] = useState('');
   const [showShareModal, setShowShareModal] = useState(false);
   const [selectedDoc, setSelectedDoc] = useState<any>(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  
+  // Share modal states
+  const [shareNpm, setShareNpm] = useState('');
+  const [sharePermission, setSharePermission] = useState('view');
+  const [shareLoading, setShareLoading] = useState(false);
+  const [shareMessage, setShareMessage] = useState('');
+  const [shareMessageType, setShareMessageType] = useState<'success' | 'error'>('success');
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -48,13 +54,10 @@ const KolaborasiPage = () => {
     setUserNpm(userData.npm);
     setUserName(userData.name || 'User');
 
-    // Fetch data berdasarkan tab aktif
-    if (activeTab === 'received') {
-      fetchSharedDocuments(userData.npm, token);
-    } else {
-      fetchMyDocuments(token, userData.npm);
-    }
-  }, [router, activeTab]);
+    // Fetch both shared and my documents
+    fetchSharedDocuments(userData.npm, token);
+    fetchMyDocuments(token, userData.npm);
+  }, [router]);
 
   const fetchSharedDocuments = async (npm: string, token: string) => {
     setLoading(true);
@@ -112,19 +115,121 @@ const KolaborasiPage = () => {
   };
 
   const openShareModal = (doc: any) => {
+    console.log('Opening share modal for document:', doc); // Debug
+    console.log('Document ID:', doc._id || doc.id); // Debug
+    console.log('showShareModal BEFORE:', showShareModal); // Debug
     setSelectedDoc(doc);
     setShowShareModal(true);
+    setShareNpm('');
+    setSharePermission('view');
+    setShareMessage('');
+    console.log('showShareModal AFTER set to true'); // Debug
+    
+    // Force re-render check
+    setTimeout(() => {
+      console.log('showShareModal state after timeout:', showShareModal);
+    }, 100);
   };
 
   const closeShareModal = () => {
     setShowShareModal(false);
     setSelectedDoc(null);
+    setShareNpm('');
+    setSharePermission('view');
+    setShareMessage('');
+  };
+
+  const handleShare = async () => {
+    if (!shareNpm.trim()) {
+      setShareMessage('NPM tidak boleh kosong');
+      setShareMessageType('error');
+      return;
+    }
+
+    if (!selectedDoc || !selectedDoc._id) {
+      setShareMessage('Dokumen tidak valid');
+      setShareMessageType('error');
+      return;
+    }
+
+    setShareLoading(true);
+    setShareMessage('');
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/documents/share', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          documentId: selectedDoc._id,
+          shareWithNpm: shareNpm,
+          permission: sharePermission,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setShareMessage(data.message || 'Dokumen berhasil dibagikan');
+        setShareMessageType('success');
+        setShareNpm('');
+        setSharePermission('view');
+        refreshDocuments();
+        setTimeout(() => {
+          setShareMessage('');
+          closeShareModal();
+        }, 2000);
+      } else {
+        setShareMessage(data.error || 'Gagal membagikan dokumen');
+        setShareMessageType('error');
+      }
+    } catch (err) {
+      setShareMessage('Terjadi kesalahan saat membagikan dokumen');
+      setShareMessageType('error');
+    } finally {
+      setShareLoading(false);
+    }
+  };
+
+  const handleRemoveAccess = async (userNpm: string) => {
+    if (!confirm('Hapus akses user ini?')) return;
+    if (!selectedDoc || !selectedDoc._id) return;
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/documents/share?documentId=${selectedDoc._id}&npm=${userNpm}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setShareMessage('Akses berhasil dihapus');
+        setShareMessageType('success');
+        refreshDocuments();
+        setTimeout(() => {
+          setShareMessage('');
+        }, 2000);
+      } else {
+        setShareMessage(data.error || 'Gagal menghapus akses');
+        setShareMessageType('error');
+      }
+    } catch (err) {
+      setShareMessage('Terjadi kesalahan');
+      setShareMessageType('error');
+    }
   };
 
   const refreshDocuments = () => {
     const token = localStorage.getItem('token');
     const userDataStr = localStorage.getItem('user');
-    if (token && userDataStr && activeTab === 'share') {
+    if (token && userDataStr) {
       const userData = JSON.parse(userDataStr);
       const npm = userData.npm;
       if (npm) {
@@ -186,6 +291,11 @@ const KolaborasiPage = () => {
     return permission === 'download' || permission === 'edit';
   };
 
+  // Statistics calculations
+  const totalShared = myDocs.filter(doc => doc.sharedWith && doc.sharedWith.length > 0).length;
+  const totalReceived = sharedDocs.length;
+  const totalMyDocs = myDocs.length;
+
   return (
     <div className="app">
       {/* Sidebar */}
@@ -229,199 +339,332 @@ const KolaborasiPage = () => {
         </div>
 
         <div className="content-card">
-          {/* Tabs Navigation */}
-          <div className="tabs-container">
-            <button 
-              className={`tab-button ${activeTab === 'received' ? 'active' : ''}`}
-              onClick={() => setActiveTab('received')}
-            >
-              <i className="fas fa-inbox"></i> Dibagikan ke Saya
-            </button>
-            <button 
-              className={`tab-button ${activeTab === 'share' ? 'active' : ''}`}
-              onClick={() => setActiveTab('share')}
-            >
-              <i className="fas fa-share-alt"></i> Bagikan Dokumen
-            </button>
+          {/* Statistics Cards */}
+          <div className="stats-container">
+            <div className="stat-card stat-total">
+              <div className="stat-icon">
+                <i className="fas fa-folder"></i>
+              </div>
+              <div className="stat-info">
+                <h3>{totalMyDocs}</h3>
+                <p>Total Dokumen Saya</p>
+              </div>
+            </div>
+            <div className="stat-card stat-shared">
+              <div className="stat-icon">
+                <i className="fas fa-share-alt"></i>
+              </div>
+              <div className="stat-info">
+                <h3>{totalShared}</h3>
+                <p>Dokumen Dibagikan</p>
+              </div>
+            </div>
+            <div className="stat-card stat-received">
+              <div className="stat-icon">
+                <i className="fas fa-inbox"></i>
+              </div>
+              <div className="stat-info">
+                <h3>{totalReceived}</h3>
+                <p>Diterima dari Lain</p>
+              </div>
+            </div>
           </div>
 
-          {/* Tab: Dibagikan ke Saya */}
-          {activeTab === 'received' && (
-            <>
-              <div className="kolaborasi-header">
-                <h2 className="kolaborasi-title">
-                  <i className="fas fa-inbox"></i> Dokumen yang Dibagikan ke Saya
-                </h2>
-                <p className="kolaborasi-subtitle">
-                  Dokumen yang dibagikan oleh user lain kepada <strong>{userName}</strong> (NPM: {userNpm})
-                </p>
-              </div>
+          {/* Dibagikan ke Saya Section */}
+          <div className="section-container">
+            <div className="section-header">
+              <h2 className="section-title">
+                <i className="fas fa-inbox"></i> Dibagikan ke Saya
+              </h2>
+              <p className="section-subtitle">
+                Dokumen yang dibagikan oleh user lain kepada Anda
+              </p>
+            </div>
 
-              {loading ? (
-                <div style={{ textAlign: 'center', padding: '3rem' }}>
-                  <div className="spinner"></div>
-                  <p className="loading-text">Memuat dokumen...</p>
-                </div>
-              ) : sharedDocs.length === 0 ? (
-                <div className="empty-state-collab">
-                  <i className="fas fa-share-alt"></i>
-                  <h3>Belum Ada Dokumen yang Dibagikan</h3>
-                  <p>Ketika ada user yang membagikan dokumen kepada Anda, dokumen akan muncul di sini.</p>
-                </div>
-              ) : (
-                <div className="documents-grid">
-                  {sharedDocs.map((doc) => (
-                    <div key={doc._id} className="document-card">
+            {loading ? (
+              <div className="loading-container">
+                <div className="spinner"></div>
+                <p>Memuat dokumen...</p>
+              </div>
+            ) : sharedDocs.length === 0 ? (
+              <div className="empty-state">
+                <i className="fas fa-inbox"></i>
+                <h3>Belum Ada Dokumen</h3>
+                <p>Ketika ada user yang membagikan dokumen kepada Anda, dokumen akan muncul di sini.</p>
+              </div>
+            ) : (
+              <div className="documents-grid">
+                {sharedDocs.map((doc) => (
+                  <div key={doc._id} className="document-card">
+                    <div className="document-header">
                       <div className="document-icon">
                         <i className={`fas ${getFileIcon(doc.namaFile)}`}></i>
                       </div>
-
-                      <h3 className="document-title">{doc.namaFile}</h3>
-
-                      <div className="document-category-badge">
-                        <i className="fas fa-tag"></i> {doc.kategori}
-                      </div>
-
-                      <p className="document-description">
-                        {doc.deskripsi || 'Tidak ada deskripsi'}
-                      </p>
-
-                      <div className="document-meta">
-                        <span className="document-meta-item">
-                          <i className="fas fa-hdd"></i> {formatFileSize(doc.fileSize)}
-                        </span>
-                        <span className="document-meta-item">
-                          <i className="fas fa-calendar"></i> {formatDate(doc.createdAt)}
-                        </span>
-                      </div>
-
-                      <div className="shared-info-section">
-                        <span className="shared-by-info">
-                          <i className="fas fa-user"></i> {doc.sharedByName || `NPM: ${doc.sharedBy}`}
-                        </span>
-                        {getPermissionBadge(doc.myPermission)}
-                      </div>
-
-                      <div className="document-actions">
-                        <a 
-                          href={doc.fileUrl} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="btn-document-action btn-view"
-                        >
-                          <i className="fas fa-eye"></i> Lihat
-                        </a>
-                        {canDownload(doc.myPermission) && (
-                          <a
-                            href={doc.fileUrl}
-                            download={doc.namaFile}
-                            className="btn-document-action btn-download"
-                          >
-                            <i className="fas fa-download"></i> Download
-                          </a>
-                        )}
-                      </div>
+                      {getPermissionBadge(doc.myPermission)}
                     </div>
-                  ))}
-                </div>
-              )}
-            </>
-          )}
 
-          {/* Tab: Bagikan Dokumen */}
-          {activeTab === 'share' && (
-            <>
-              <div className="kolaborasi-header">
-                <h2 className="kolaborasi-title">
-                  <i className="fas fa-share-alt"></i> Bagikan Dokumen Saya
-                </h2>
-                <p className="kolaborasi-subtitle">
-                  Pilih dokumen yang ingin Anda bagikan ke user lain
-                </p>
+                    <h3 className="document-title">{doc.namaFile}</h3>
+                    
+                    <div className="document-category">
+                      <i className="fas fa-tag"></i> {doc.kategori}
+                    </div>
+
+                    <div className="document-meta">
+                      <span><i className="fas fa-user"></i> {doc.sharedByName || doc.sharedBy}</span>
+                      <span><i className="fas fa-calendar"></i> {formatDate(doc.createdAt)}</span>
+                    </div>
+
+                    <div className="document-actions">
+                      <button 
+                        onClick={() => { setSelectedDoc(doc); setShowDetailModal(true); }}
+                        className="btn-action btn-view"
+                      >
+                        <i className="fas fa-eye"></i> Detail
+                      </button>
+                      {canDownload(doc.myPermission) && (
+                        <a
+                          href={doc.fileUrl}
+                          download={doc.namaFile}
+                          className="btn-action btn-download"
+                        >
+                          <i className="fas fa-download"></i>
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                ))}
               </div>
+            )}
+          </div>
 
-              {myDocs.length === 0 ? (
-                <div className="empty-state-collab">
-                  <i className="fas fa-folder-open"></i>
-                  <h3>Belum Ada Dokumen</h3>
-                  <p>Tambahkan dokumen terlebih dahulu untuk dapat membagikannya.</p>
-                  <Link href="/tambah-dokumen" className="btn-primary">
-                    <i className="fas fa-plus"></i> Tambah Dokumen
-                  </Link>
-                </div>
-              ) : loading ? (
-                <div style={{ textAlign: 'center', padding: '3rem' }}>
-                  <div className="spinner"></div>
-                  <p className="loading-text">Memuat dokumen...</p>
-                </div>
-              ) : (
-                <div className="table-container">
-                  <table className="archive-table">
-                    <thead>
-                      <tr>
-                        <th style={{ width: '50px' }}>No</th>
-                        <th>Judul Dokumen</th>
-                        <th>Kategori</th>
-                        <th style={{ width: '120px' }}>Tanggal Upload</th>
-                        <th style={{ width: '150px' }}>Aksi</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {myDocs.map((doc, index) => (
-                        <tr key={doc._id}>
-                          <td>{index + 1}</td>
-                          <td>
-                            <div className="doc-title-cell">
-                              <i className={`fas ${getFileIcon(doc.namaFile)}`}></i>
-                              {doc.namaFile}
-                            </div>
-                          </td>
-                          <td>
-                            <span className="category-badge">{doc.kategori}</span>
-                          </td>
-                          <td>{formatDate(doc.createdAt)}</td>
-                          <td>
-                            <div className="action-buttons">
-                              <a
-                                href={doc.fileUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="btn-action"
-                                style={{ color: '#3b82f6', background: 'rgba(59, 130, 246, 0.1)' }}
-                                title="Lihat"
-                              >
-                                <i className="fas fa-eye"></i>
-                              </a>
-                              <button
-                                className="btn-action"
-                                style={{ color: '#10b981', background: 'rgba(16, 185, 129, 0.1)' }}
-                                onClick={() => openShareModal(doc)}
-                                title="Bagikan"
-                              >
-                                <i className="fas fa-share-alt"></i>
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </>
-          )}
+          {/* Dokumen Saya Section */}
+          <div className="section-container">
+            <div className="section-header">
+              <h2 className="section-title">
+                <i className="fas fa-folder"></i> Dokumen Saya
+              </h2>
+              <p className="section-subtitle">
+                Kelola dan bagikan dokumen Anda ke user lain
+              </p>
+            </div>
+
+            {myDocs.length === 0 ? (
+              <div className="empty-state">
+                <i className="fas fa-folder-open"></i>
+                <h3>Belum Ada Dokumen</h3>
+                <p>Tambahkan dokumen terlebih dahulu untuk dapat membagikannya.</p>
+                <Link href="/tambah-dokumen" className="btn-primary">
+                  <i className="fas fa-plus"></i> Tambah Dokumen
+                </Link>
+              </div>
+            ) : loading ? (
+              <div className="loading-container">
+                <div className="spinner"></div>
+                <p>Memuat dokumen...</p>
+              </div>
+            ) : (
+              <div className="documents-grid">
+                {myDocs.map((doc) => (
+                  <div key={doc._id} className="document-card my-document">
+                    <div className="document-header">
+                      <div className="document-icon">
+                        <i className={`fas ${getFileIcon(doc.namaFile)}`}></i>
+                      </div>
+                      {doc.sharedWith && doc.sharedWith.length > 0 && (
+                        <span className="shared-indicator">
+                          <i className="fas fa-users"></i> {doc.sharedWith.length}
+                        </span>
+                      )}
+                    </div>
+
+                    <h3 className="document-title">{doc.namaFile}</h3>
+                    
+                    <div className="document-category">
+                      <i className="fas fa-tag"></i> {doc.kategori}
+                    </div>
+
+                    <div className="document-meta">
+                      <span><i className="fas fa-calendar"></i> {formatDate(doc.createdAt)}</span>
+                    </div>
+
+                    <div className="document-actions">
+                      <button 
+                        onClick={() => { setSelectedDoc(doc); setShowDetailModal(true); }}
+                        className="btn-action btn-view"
+                      >
+                        <i className="fas fa-eye"></i> Detail
+                      </button>
+                      <button
+                        onClick={() => openShareModal(doc)}
+                        className="btn-action btn-share"
+                      >
+                        <i className="fas fa-share-alt"></i> Bagikan
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Share Modal */}
-        {showShareModal && selectedDoc && (
-          <ShareModal
-            isOpen={showShareModal}
-            onClose={closeShareModal}
-            documentId={selectedDoc._id?.toString() || selectedDoc.id?.toString()}
-            documentName={selectedDoc.namaFile}
-            sharedWith={selectedDoc.sharedWith || []}
-            onRefresh={refreshDocuments}
-          />
+        {console.log('Render check - showShareModal:', showShareModal, 'selectedDoc:', selectedDoc)}
+        {showShareModal && selectedDoc ? (
+          <div className="modal-overlay" onClick={closeShareModal}>
+            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+              <div className="modal-header">
+                <h2>
+                  <i className="fas fa-share-alt"></i> Bagikan Dokumen
+                </h2>
+                <button className="modal-close" onClick={closeShareModal}>
+                  <i className="fas fa-times"></i>
+                </button>
+              </div>
+
+              <div className="modal-body">
+                <div className="document-info">
+                  <i className="fas fa-file"></i>
+                  <span>{selectedDoc.namaFile}</span>
+                </div>
+
+                {shareMessage && (
+                  <div className={`message ${shareMessageType}`}>
+                    <i className={`fas fa-${shareMessageType === 'success' ? 'check-circle' : 'exclamation-circle'}`}></i>
+                    {shareMessage}
+                  </div>
+                )}
+
+                <div className="form-group">
+                  <label htmlFor="npm">NPM Mahasiswa</label>
+                  <input
+                    type="text"
+                    id="npm"
+                    value={shareNpm}
+                    onChange={(e) => setShareNpm(e.target.value)}
+                    placeholder="Masukkan NPM mahasiswa"
+                    disabled={shareLoading}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="permission">Permission</label>
+                  <select
+                    id="permission"
+                    value={sharePermission}
+                    onChange={(e) => setSharePermission(e.target.value)}
+                    disabled={shareLoading}
+                  >
+                    <option value="view">👁️ View Only - Hanya bisa melihat</option>
+                    <option value="download">📥 Download - Bisa melihat dan download</option>
+                    <option value="edit">✏️ Edit - Bisa melihat, download, dan edit</option>
+                  </select>
+                </div>
+
+                <button className="btn-share" onClick={handleShare} disabled={shareLoading}>
+                  {shareLoading ? (
+                    <>
+                      <i className="fas fa-spinner fa-spin"></i> Membagikan...
+                    </>
+                  ) : (
+                    <>
+                      <i className="fas fa-share"></i> Bagikan Dokumen
+                    </>
+                  )}
+                </button>
+
+                {selectedDoc.sharedWith && selectedDoc.sharedWith.length > 0 && (
+                  <div className="shared-users">
+                    <h3>
+                      <i className="fas fa-users"></i> Dibagikan Kepada ({selectedDoc.sharedWith.length})
+                    </h3>
+                    <div className="users-list">
+                      {selectedDoc.sharedWith.map((user: any) => (
+                        <div key={user.npm} className="user-item">
+                          <div className="user-info">
+                            <i className="fas fa-user-circle"></i>
+                            <div>
+                              <strong>{user.name}</strong>
+                              <span className="user-npm">NPM: {user.npm}</span>
+                            </div>
+                          </div>
+                          <div className="user-actions">
+                            <span className={`permission-tag permission-${user.permission}`}>
+                              {user.permission === 'view' && '👁️ View'}
+                              {user.permission === 'download' && '📥 Download'}
+                              {user.permission === 'edit' && '✏️ Edit'}
+                            </span>
+                            <button
+                              className="btn-remove"
+                              onClick={() => handleRemoveAccess(user.npm)}
+                              title="Hapus akses"
+                            >
+                              <i className="fas fa-times"></i>
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        ) : (
+          console.log('Modal NOT rendered - showShareModal:', showShareModal, 'selectedDoc:', selectedDoc)
+        )}
+
+        {/* Detail Modal */}
+        {showDetailModal && selectedDoc && (
+          <div className="modal-overlay active" onClick={() => setShowDetailModal(false)}>
+            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+              <div className="modal-header">
+                <h2 className="modal-title">Detail Arsip</h2>
+                <button className="modal-close" onClick={() => setShowDetailModal(false)}>
+                  <i className="fas fa-times"></i>
+                </button>
+              </div>
+              <div className="modal-body">
+                <div className="form-group">
+                  <label>Judul Arsip</label>
+                  <div>{selectedDoc.namaFile}</div>
+                </div>
+                <div className="form-group">
+                  <label>Kategori</label>
+                  <div>{selectedDoc.kategori}</div>
+                </div>
+                <div className="form-group">
+                  <label>File/Foto</label>
+                  <div>
+                    <a href={selectedDoc.fileUrl} target="_blank" rel="noopener noreferrer">
+                      {selectedDoc.namaFile}
+                    </a>
+                  </div>
+                </div>
+                <div className="form-group">
+                  <label>Tanggal Upload</label>
+                  <div>{formatDate(selectedDoc.createdAt)}</div>
+                </div>
+                {selectedDoc.sharedByName && (
+                  <div className="form-group">
+                    <label>Dibagikan Oleh</label>
+                    <div>{selectedDoc.sharedByName}</div>
+                  </div>
+                )}
+                {selectedDoc.myPermission && (
+                  <div className="form-group">
+                    <label>Hak Akses</label>
+                    <div>{getPermissionBadge(selectedDoc.myPermission)}</div>
+                  </div>
+                )}
+              </div>
+              <div className="modal-actions">
+                <button className="btn-cancel" onClick={() => setShowDetailModal(false)}>
+                  Tutup
+                </button>
+              </div>
+            </div>
+          </div>
         )}
       </main>
     </div>
