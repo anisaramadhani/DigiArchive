@@ -39,10 +39,12 @@ export async function GET(req: Request) {
       
       return {
         _id: doc._id.toString(),
-        namaFile: doc.namaFile || doc.judul || 'Untitled',
-        kategori: doc.kategori || 'Lainnya',
-        deskripsi: doc.deskripsi || '',
-        fileUrl: doc.fileUrl || doc.file || '',
+        namaFile: doc.title || doc.namaFile || doc.judul || 'Dokumen',
+        kategori: doc.category || doc.kategori || 'Lainnya',
+        deskripsi: doc.description || doc.deskripsi || '',
+        fileUrl: doc.image || doc.fileUrl || doc.file || '',
+        fileName: doc.fileName || doc.file_asli || doc.title || 'file',
+        fileType: doc.fileType || '',
         fileSize: doc.fileSize || 0,
         createdAt: doc.createdAt || doc.tanggal_upload || new Date(),
         myPermission: shareInfo?.permission || 'view',

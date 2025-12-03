@@ -70,6 +70,8 @@ const KolaborasiPage = () => {
 
       if (response.ok) {
         const data = await response.json();
+        console.log('Shared documents API Response:', data); // Debug
+        console.log('First shared doc:', data.documents?.[0]); // Debug detail pertama
         setSharedDocs(data.documents || []);
       }
     } catch (err) {
@@ -253,12 +255,28 @@ const KolaborasiPage = () => {
   };
 
   const formatDate = (dateString: string): string => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('id-ID', {
-      day: '2-digit',
-      month: 'long',
-      year: 'numeric'
-    });
+    if (!dateString) return '-';
+    
+    // Jika sudah dalam format Indonesia, return langsung
+    if (typeof dateString === 'string' && dateString.includes('Desember') || 
+        dateString.includes('November') || dateString.includes('Oktober')) {
+      return dateString;
+    }
+    
+    try {
+      const date = new Date(dateString);
+      // Cek apakah valid date
+      if (isNaN(date.getTime())) {
+        return dateString; // Return original jika tidak bisa diparse
+      }
+      return date.toLocaleDateString('id-ID', {
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric'
+      });
+    } catch (err) {
+      return dateString || '-';
+    }
   };
 
   const getFileIcon = (fileName: string): string => {
@@ -636,9 +654,125 @@ const KolaborasiPage = () => {
                 <div className="form-group">
                   <label>File/Foto</label>
                   <div>
-                    <a href={selectedDoc.fileUrl} target="_blank" rel="noopener noreferrer">
-                      {selectedDoc.namaFile}
-                    </a>
+                    {selectedDoc.fileUrl && selectedDoc.fileUrl.length > 10 ? (
+                      selectedDoc.fileUrl.startsWith('data:image') ? (
+                        // Jika file adalah gambar, tampilkan preview
+                        <div style={{ marginTop: '0.5rem' }}>
+                          <img 
+                            src={selectedDoc.fileUrl} 
+                            alt={selectedDoc.fileName || selectedDoc.namaFile}
+                            style={{ 
+                              maxWidth: '100%', 
+                              maxHeight: '400px', 
+                              borderRadius: '8px',
+                              border: '2px solid #e5e7eb',
+                              cursor: 'pointer'
+                            }}
+                            onClick={() => window.open(selectedDoc.fileUrl, '_blank')}
+                          />
+                          <div style={{ marginTop: '0.75rem', fontSize: '0.9rem', color: '#64748b' }}>
+                            <i className="fas fa-file-image"></i> {selectedDoc.fileName || selectedDoc.namaFile}
+                          </div>
+                          {/* Tombol download hanya muncul jika bukan view only */}
+                          {selectedDoc.myPermission && selectedDoc.myPermission !== 'view' && (
+                            <div style={{ marginTop: '0.5rem' }}>
+                              <a 
+                                href={selectedDoc.fileUrl} 
+                                download={selectedDoc.fileName || selectedDoc.namaFile}
+                                style={{ 
+                                  color: '#6366f1', 
+                                  textDecoration: 'none',
+                                  padding: '0.5rem 1rem',
+                                  background: 'rgba(99, 102, 241, 0.1)',
+                                  borderRadius: '8px',
+                                  display: 'inline-block',
+                                  fontSize: '0.9rem',
+                                  fontWeight: '500'
+                                }}
+                              >
+                                <i className="fas fa-download"></i> Download File
+                              </a>
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        // Jika bukan gambar (PDF, dll)
+                        <div>
+                          <div style={{
+                            padding: '1rem',
+                            background: '#f3f4f6',
+                            borderRadius: '8px',
+                            marginBottom: '0.75rem'
+                          }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                              <i className="fas fa-file-pdf" style={{ fontSize: '2rem', color: '#ef4444' }}></i>
+                              <div>
+                                <strong style={{ color: '#1e293b' }}>{selectedDoc.fileName || selectedDoc.namaFile}</strong>
+                                <div style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '0.25rem' }}>
+                                  {selectedDoc.myPermission === 'view' ? 'Klik tombol di bawah untuk melihat' : 'Klik untuk melihat atau download'}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                            {/* Tombol Buka/Lihat - selalu ada */}
+                            <button
+                              onClick={() => {
+                                const newWindow = window.open();
+                                if (newWindow) {
+                                  newWindow.document.write(`
+                                    <html>
+                                      <head><title>${selectedDoc.fileName || selectedDoc.namaFile}</title></head>
+                                      <body style="margin:0">
+                                        <iframe src="${selectedDoc.fileUrl}" style="width:100%;height:100vh;border:none"></iframe>
+                                      </body>
+                                    </html>
+                                  `);
+                                }
+                              }}
+                              style={{ 
+                                color: '#3b82f6',
+                                textDecoration: 'none',
+                                padding: '0.65rem 1.25rem',
+                                background: 'rgba(59, 130, 246, 0.1)',
+                                borderRadius: '8px',
+                                display: 'inline-block',
+                                fontSize: '0.9rem',
+                                fontWeight: '500',
+                                cursor: 'pointer',
+                                border: 'none'
+                              }}
+                            >
+                              <i className="fas fa-eye"></i> Lihat File
+                            </button>
+                            {/* Tombol download hanya jika bukan view only */}
+                            {selectedDoc.myPermission && selectedDoc.myPermission !== 'view' && (
+                              <a 
+                                href={selectedDoc.fileUrl} 
+                                download={selectedDoc.fileName || selectedDoc.namaFile}
+                                style={{ 
+                                  color: '#6366f1',
+                                  textDecoration: 'none',
+                                  padding: '0.65rem 1.25rem',
+                                  background: 'rgba(99, 102, 241, 0.1)',
+                                  borderRadius: '8px',
+                                  display: 'inline-block',
+                                  fontSize: '0.9rem',
+                                  fontWeight: '500',
+                                  cursor: 'pointer'
+                                }}
+                              >
+                                <i className="fas fa-download"></i> Download
+                              </a>
+                            )}
+                          </div>
+                        </div>
+                      )
+                    ) : (
+                      <div style={{ color: '#6b7280', fontSize: '0.9rem' }}>
+                        <i className="fas fa-exclamation-triangle"></i> File tidak tersedia
+                      </div>
+                    )}
                   </div>
                 </div>
                 <div className="form-group">

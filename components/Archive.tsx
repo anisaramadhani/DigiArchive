@@ -266,7 +266,19 @@ const Archive: React.FC<ArchiveProps> = ({
             <div className="modal-body">
               <div className="form-group"><label>Judul Arsip</label><div>{selectedArchive.judul}</div></div>
               <div className="form-group"><label>Kategori</label><div>{selectedArchive.kategori}</div></div>
-              <div className="form-group"><label>File/Foto</label><div><a href={selectedArchive.fileUrl} target="_blank" rel="noreferrer">{selectedArchive.file}</a></div></div>
+              <div className="form-group">
+                <label>File/Foto</label>
+                <div>
+                  <a 
+                    href={selectedArchive.fileUrl} 
+                    target="_blank" 
+                    rel="noreferrer"
+                    style={{ color: '#2563eb', textDecoration: 'underline', cursor: 'pointer' }}
+                  >
+                    {selectedArchive.file}
+                  </a>
+                </div>
+              </div>
               <div className="form-group"><label>Tanggal Upload</label><div>{selectedArchive.tanggal_upload}</div></div>
             </div>
             <div className="modal-actions">
