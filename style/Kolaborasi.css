@@ -262,16 +262,32 @@
   box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
 }
 
-.btn-share {
-  background: rgba(16, 185, 129, 0.1);
-  color: #10b981;
+.btn-delete {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  width: 45px;
+  padding: 0.75rem;
 }
 
-.btn-share:hover {
-  background: #10b981;
+.btn-delete:hover {
+  background: #ef4444;
   color: white;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+/* Tombol Bagikan di Card Dokumen */
+.btn-share.btn-action {
+  background: rgba(99, 102, 241, 0.1);
+  color: #6366f1;
+  flex: 1;
+}
+
+.btn-share.btn-action:hover {
+  background: #6366f1;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
 }
 
 /* Permission Badges */
@@ -436,10 +452,10 @@
   background: white;
   border-radius: 15px;
   width: 90%;
-  max-width: 600px;
-  max-height: 90vh;
+  max-width: 520px;
+  max-height: 85vh;
   overflow-y: auto;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 20px 60px rgba(99, 102, 241, 0.25);
   animation: slideUp 0.3s ease-out;
   position: relative;
   z-index: 10000;
@@ -460,9 +476,9 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1.5rem 2rem;
-  border-bottom: 2px solid #e5e7eb;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 1.75rem 2rem;
+  border-bottom: none;
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a78bfa 100%);
   color: white;
   border-radius: 15px 15px 0 0;
 }
@@ -502,24 +518,26 @@
 }
 
 .document-info {
-  background: #f3f4f6;
-  padding: 1rem;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(139, 92, 246, 0.08) 100%);
+  padding: 1rem 1.25rem;
   border-radius: 10px;
   margin-bottom: 1.5rem;
   display: flex;
   align-items: center;
   gap: 0.75rem;
   color: #374151;
+  border: 2px solid rgba(99, 102, 241, 0.15);
 }
 
 .document-info i {
-  font-size: 1.5rem;
-  color: #667eea;
+  font-size: 1.75rem;
+  color: #6366f1;
 }
 
 .document-info span {
-  font-weight: 500;
-  font-size: 1.1rem;
+  font-weight: 600;
+  font-size: 1.05rem;
+  color: #1e293b;
 }
 
 .message {
@@ -561,36 +579,92 @@
 
 .form-group label {
   display: block;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.75rem;
   font-weight: 600;
-  color: #374151;
+  color: #1e293b;
   font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 0.85rem;
 }
 
 .form-group input,
 .form-group select {
   width: 100%;
-  padding: 0.875rem;
+  padding: 0.95rem 1.1rem;
   border: 2px solid #e5e7eb;
-  border-radius: 8px;
-  font-size: 1rem;
+  border-radius: 10px;
+  font-size: 0.95rem;
   transition: all 0.3s ease;
   background: white;
   position: relative;
   z-index: 1;
+  color: #1f2937;
+}
+
+.form-group select {
+  padding-right: 3rem;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Cpath fill='%236366f1' d='M4 6l4 4 4-4'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 16px;
+  cursor: pointer;
 }
 
 .form-group input:focus,
 .form-group select:focus {
   outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  border-color: #6366f1;
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
 }
 
 .form-group input:disabled,
 .form-group select:disabled {
   background: #f3f4f6;
   cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Tombol Bagikan Dokumen di Modal */
+.modal-body .btn-share {
+  width: 100%;
+  padding: 1rem 1.5rem;
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+  margin-top: 0.75rem;
+}
+
+.modal-body .btn-share:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+}
+
+.modal-body .btn-share:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.modal-body .btn-share:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.modal-body .btn-share i {
+  font-size: 1.1rem;
 }
 
 .shared-users {

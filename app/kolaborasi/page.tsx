@@ -228,6 +228,32 @@ const KolaborasiPage = () => {
     }
   };
 
+  const handleRemoveFromMyList = async (docId: string) => {
+    if (!confirm('Hapus dokumen ini dari list Anda? Dokumen masih akan tersimpan di pemilik asli.')) return;
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/documents/share?documentId=${docId}&npm=${userNpm}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Refresh list dokumen yang dibagikan
+        fetchSharedDocuments(userNpm, token || '');
+        alert('Dokumen berhasil dihapus dari list Anda');
+      } else {
+        alert(data.error || 'Gagal menghapus dokumen');
+      }
+    } catch (err) {
+      alert('Terjadi kesalahan');
+    }
+  };
+
   const refreshDocuments = () => {
     const token = localStorage.getItem('token');
     const userDataStr = localStorage.getItem('user');
@@ -295,13 +321,13 @@ const KolaborasiPage = () => {
   const getPermissionBadge = (permission: string) => {
     switch (permission) {
       case 'view':
-        return <span className="permission-badge permission-view">👁️ View Only</span>;
+        return <span className="permission-badge permission-view">View Only</span>;
       case 'download':
-        return <span className="permission-badge permission-download">📥 Download</span>;
+        return <span className="permission-badge permission-download">Download</span>;
       case 'edit':
-        return <span className="permission-badge permission-edit">✏️ Edit</span>;
+        return <span className="permission-badge permission-edit">Edit</span>;
       default:
-        return <span className="permission-badge permission-view">👁️ View</span>;
+        return <span className="permission-badge permission-view">View</span>;
     }
   };
 
@@ -315,7 +341,7 @@ const KolaborasiPage = () => {
   const totalMyDocs = myDocs.length;
 
   return (
-    <div className="app">
+    <div className="app kolaborasi-page">
       {/* Sidebar */}
       <nav className="sidebar">
         <div className="sidebar-header">
@@ -448,6 +474,13 @@ const KolaborasiPage = () => {
                           <i className="fas fa-download"></i>
                         </a>
                       )}
+                      <button
+                        onClick={() => handleRemoveFromMyList(doc._id)}
+                        className="btn-action btn-delete"
+                        title="Hapus dari list saya"
+                      >
+                        <i className="fas fa-trash"></i>
+                      </button>
                     </div>
                   </div>
                 ))}
@@ -573,9 +606,9 @@ const KolaborasiPage = () => {
                     onChange={(e) => setSharePermission(e.target.value)}
                     disabled={shareLoading}
                   >
-                    <option value="view">👁️ View Only - Hanya bisa melihat</option>
-                    <option value="download">📥 Download - Bisa melihat dan download</option>
-                    <option value="edit">✏️ Edit - Bisa melihat, download, dan edit</option>
+                    <option value="view">View Only - Hanya bisa melihat</option>
+                    <option value="download">Download - Bisa melihat dan download</option>
+                    <option value="edit">Edit - Bisa melihat, download, dan edit</option>
                   </select>
                 </div>
 
@@ -608,9 +641,9 @@ const KolaborasiPage = () => {
                           </div>
                           <div className="user-actions">
                             <span className={`permission-tag permission-${user.permission}`}>
-                              {user.permission === 'view' && '👁️ View'}
-                              {user.permission === 'download' && '📥 Download'}
-                              {user.permission === 'edit' && '✏️ Edit'}
+                              {user.permission === 'view' && 'View'}
+                              {user.permission === 'download' && 'Download'}
+                              {user.permission === 'edit' && 'Edit'}
                             </span>
                             <button
                               className="btn-remove"
