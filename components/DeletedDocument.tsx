@@ -69,6 +69,9 @@ const DeletedDocuments: React.FC<DeletedDocumentsProps> = ({ deletedDocs = [], o
           <Link href="/arsip" className="nav-item">
             <i className="fas fa-folder-open"></i> Daftar Arsip
           </Link>
+          <Link href="/kolaborasi" className="nav-item">
+            <i className="fas fa-users"></i> Kolaborasi
+          </Link>
           <Link href="/recycle-bin" className="nav-item active">
             <i className="fas fa-trash"></i> Recycle Bin
           </Link>

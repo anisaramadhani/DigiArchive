@@ -32,6 +32,7 @@ const Dashboard: React.FC<DashboardProps> = ({ totalArsip, totalArsipHariIni, ar
           <Link href="/dashboard" className="nav-item active"><i className="fa-solid fa-layer-group"></i> Beranda</Link>
           <Link href="/tambah-dokumen" className="nav-item"><i className="fa fa-camera"></i> Tambah Dokumen</Link>
           <Link href="/arsip" className="nav-item"><i className="fas fa-folder-open"></i> Daftar Arsip</Link>
+          <Link href="/kolaborasi" className="nav-item"><i className="fas fa-users"></i> Kolaborasi</Link>
           <Link href="/recycle-bin" className="nav-item"><i className="fas fa-trash"></i> Recycle Bin</Link>
           <Link href="/profile" className="nav-item"><i className="fas fa-user"></i> Profile</Link>
         </div>
