@@ -261,7 +261,7 @@ body::before {
     overflow: hidden;
 }
 
-.hero::before {
+/* .hero::before {
     content: '';
     position: absolute;
     width: 600px;
@@ -281,12 +281,18 @@ body::before {
     bottom: -100px;
     left: -100px;
     animation: float 10s ease-in-out infinite reverse;
-}
+} */
 
-@keyframes float {
-    0%, 100% { transform: translate(0, 0) rotate(0deg); }
-    33% { transform: translate(30px, -30px) rotate(5deg); }
-    66% { transform: translate(-20px, 20px) rotate(-5deg); }
+@keyframes heroWave {
+    0% {
+        transform: translateY(0) scale(1);
+    }
+    50% {
+        transform: translateY(-12px) scale(1.02);
+    }
+    100% {
+        transform: translateY(0) scale(1);
+    }
 }
 
 .hero-container {
@@ -299,6 +305,7 @@ body::before {
     align-items: center;
     position: relative;
     z-index: 1;
+    animation: heroWave 10s ease-in-out infinite;
 }
 
 .hero-content {
