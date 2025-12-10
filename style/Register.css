@@ -30,7 +30,6 @@ body {
   background-size: 400% 400%;
   animation: gradientShift 15s ease infinite;
   min-height: 100vh;
-  overflow-x: hidden;
 }
 
 @keyframes gradientShift {
@@ -63,6 +62,8 @@ body::before {
 
 .page-center {
   min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -385,7 +386,7 @@ body::before {
 .btn-register {
   width: 100%;
   padding: 1.1rem;
-  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
   color: white;
   border: none;
   border-radius: 12px;
@@ -394,39 +395,21 @@ body::before {
   cursor: pointer;
   margin-top: 1.5rem;
   margin-bottom: 1rem;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
-  position: relative;
-  overflow: hidden;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
   animation: slideUp 0.6s ease 1.1s backwards;
 }
 
-/* Button ripple effect */
-.btn-register::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 0;
-  height: 0;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.3);
-  transform: translate(-50%, -50%);
-  transition: width 0.6s, height 0.6s;
+.btn-register:hover:not(:disabled) {
+  background: linear-gradient(135deg, #5558e3 0%, #7c3aed 100%);
+  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
+  transform: translateY(-2px);
 }
 
-.btn-register:hover::before {
-  width: 400px;
-  height: 400px;
-}
-
-.btn-register:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 15px 35px rgba(99, 102, 241, 0.4);
-}
-
-.btn-register:active {
-  transform: translateY(-1px);
+.btn-register:active:not(:disabled) {
+  background: linear-gradient(135deg, #4f46e5 0%, #6d28d9 100%);
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.4);
+  transform: translateY(0);
 }
 
 .btn-register:disabled {

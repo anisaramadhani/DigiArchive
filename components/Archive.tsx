@@ -270,12 +270,14 @@ const Archive: React.FC<ArchiveProps> = ({
                 <label>File/Foto</label>
                 <div>
                   <a 
-                    href={selectedArchive.fileUrl} 
-                    target="_blank" 
-                    rel="noreferrer"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setShowDetail(false);
+                      setShowImagePreview(true);
+                    }}
                     style={{ color: '#2563eb', textDecoration: 'underline', cursor: 'pointer' }}
                   >
-                    {selectedArchive.file}
+                    {selectedArchive.fileName || selectedArchive.file_asli || selectedArchive.file || 'Lihat file'}
                   </a>
                 </div>
               </div>
