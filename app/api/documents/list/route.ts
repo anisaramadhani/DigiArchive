@@ -32,11 +32,18 @@ export async function GET(req: Request) {
       query.category = kategori;
     }
 
-    // Get arsip
-    const arsip = await db.collection('arsip')
-      .find(query)
-      .sort({ createdAt: -1 })
-      .toArray();
+    // Get arsip - pastikan collection exists
+    let arsip = [];
+    try {
+      arsip = await db.collection('arsip')
+        .find(query)
+        .sort({ createdAt: -1 })
+        .toArray();
+    } catch (collectionErr) {
+      // Collection mungkin belum dibuat, return empty array
+      console.warn('Collection arsip not found or empty, returning empty array');
+      return NextResponse.json({ arsip: [] }, { status: 200 });
+    }
 
     // Format response
     const formattedArsip = arsip.map((item: any) => ({
