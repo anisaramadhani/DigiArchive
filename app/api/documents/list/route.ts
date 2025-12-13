@@ -59,7 +59,8 @@ export async function GET(req: Request) {
         year: 'numeric',
         month: 'long',
         day: 'numeric'
-      })
+      }),
+      sharedWith: item.sharedWith || [] // Include sharedWith array
     }));
 
     return NextResponse.json({ arsip: formattedArsip }, { status: 200 });

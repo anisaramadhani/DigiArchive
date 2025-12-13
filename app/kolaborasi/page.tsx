@@ -18,7 +18,7 @@ interface SharedDocument {
   sharedByName: string;
 }
 
-const KolaborasiPage = () => {
+const BagikanPage = () => {
   const router = useRouter();
   const [sharedDocs, setSharedDocs] = useState<SharedDocument[]>([]);
   const [myDocs, setMyDocs] = useState<any[]>([]);
@@ -324,15 +324,13 @@ const KolaborasiPage = () => {
         return <span className="permission-badge permission-view">View Only</span>;
       case 'download':
         return <span className="permission-badge permission-download">Download</span>;
-      case 'edit':
-        return <span className="permission-badge permission-edit">Edit</span>;
       default:
         return <span className="permission-badge permission-view">View</span>;
     }
   };
 
   const canDownload = (permission: string) => {
-    return permission === 'download' || permission === 'edit';
+    return permission === 'download';
   };
 
   // Statistics calculations
@@ -341,7 +339,7 @@ const KolaborasiPage = () => {
   const totalMyDocs = myDocs.length;
 
   return (
-    <div className="app kolaborasi-page">
+    <div className="app bagikan-page">
       {/* Sidebar */}
       <nav className="sidebar">
         <div className="sidebar-header">
@@ -358,8 +356,8 @@ const KolaborasiPage = () => {
           <Link href="/arsip" className="nav-item">
             <i className="fas fa-folder-open"></i> Daftar Arsip
           </Link>
-          <Link href="/kolaborasi" className="nav-item active">
-            <i className="fas fa-users"></i> Kolaborasi
+          <Link href="/bagikan" className="nav-item active">
+            <i className="fas fa-users"></i> Bagikan
           </Link>
           <Link href="/recycle-bin" className="nav-item">
             <i className="fas fa-trash"></i> Recycle Bin
@@ -379,7 +377,7 @@ const KolaborasiPage = () => {
       <main className="main-content">
         <div className="top-bar">
           <button className="menu-toggle"><i className="fas fa-bars"></i></button>
-          <h1 className="page-title">Kolaborasi</h1>
+          <h1 className="page-title">Bagikan</h1>
         </div>
 
         <div className="content-card">
@@ -608,7 +606,6 @@ const KolaborasiPage = () => {
                   >
                     <option value="view">View Only - Hanya bisa melihat</option>
                     <option value="download">Download - Bisa melihat dan download</option>
-                    <option value="edit">Edit - Bisa melihat, download, dan edit</option>
                   </select>
                 </div>
 
@@ -643,7 +640,6 @@ const KolaborasiPage = () => {
                             <span className={`permission-tag permission-${user.permission}`}>
                               {user.permission === 'view' && 'View'}
                               {user.permission === 'download' && 'Download'}
-                              {user.permission === 'edit' && 'Edit'}
                             </span>
                             <button
                               className="btn-remove"
@@ -838,4 +834,4 @@ const KolaborasiPage = () => {
   );
 };
 
-export default KolaborasiPage;
+export default BagikanPage;
