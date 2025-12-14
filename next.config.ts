@@ -1,16 +1,19 @@
-import type { NextConfig } from 'next';
-
-const repoName = 'DigiArchive';
+// next.config.ts
+import { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  output: 'export',
-
-  images: {
-    unoptimized: true,
+  reactStrictMode: true,
+  turbopack: {},
+  webpack(config, { isServer }) {
+    if (!isServer) {
+      config.resolve.fallback = {
+        fs: false,
+        path: false,
+        os: false,
+      };
+    }
+    return config;
   },
-
-  basePath: `/${repoName}`,
-  assetPrefix: `/${repoName}/`,
 };
 
 export default nextConfig;
