@@ -48,6 +48,7 @@ export async function GET(req: Request) {
         email: user.email,
         npm: user.npm,
         jurusan: user.jurusan || '-',
+        foto: user.foto || null,
         created_at: user.createdAt,
       }
     }, { status: 200 });

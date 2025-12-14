@@ -85,6 +85,42 @@ export default function ProfilePage() {
     setErrorMessage("");
   };
 
+  const handlePhotoUpload = async (photo: Blob) => {
+    const token = localStorage.getItem("token");
+    const userDataStr = localStorage.getItem("user");
+    
+    if (!token || !userDataStr) throw new Error("User tidak login");
+
+    const userData = JSON.parse(userDataStr);
+
+    // Create form data
+    const formData = new FormData();
+    formData.append("photo", photo, "profile.jpg");
+    formData.append("npm", userData.npm);
+
+    const res = await fetch("/api/auth/upload-photo", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+      body: formData,
+    });
+
+    if (!res.ok) {
+      const errData = await res.json();
+      throw new Error(errData.error || "Gagal mengupload foto");
+    }
+
+    const data = await res.json();
+    
+    // Update user state with new photo
+    setUser(prev => prev ? { ...prev, foto: data.photoUrl } : null);
+    setSuccessMessage("Foto profile berhasil diubah");
+    setErrorMessage("");
+    
+    // Update localStorage
+    const updatedUser = { ...userData, foto: data.photoUrl };
+    localStorage.setItem("user", JSON.stringify(updatedUser));
+  };
+
   return (
     <Profile
       user={user || undefined}
@@ -92,6 +128,7 @@ export default function ProfilePage() {
       errorMessage={errorMessage}
       handleLogout={handleLogout}
       handlePasswordChange={handlePasswordChange}
+      handlePhotoUpload={handlePhotoUpload}
     />
   );
 }

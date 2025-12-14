@@ -1,7 +1,8 @@
 "use client";
-import React, { useState, ChangeEvent, FormEvent } from "react";
+import React, { useState, ChangeEvent, FormEvent, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import ImageCropper from "./ImageCropper";
 import "../style/Profile.css";
 
 interface User {
@@ -23,6 +24,7 @@ interface ProfileProps {
     newPassword: string;
     confirmPassword: string;
   }) => Promise<void>;
+  handlePhotoUpload?: (photo: Blob) => Promise<void>;
 }
 
 const Profile: React.FC<ProfileProps> = ({
@@ -31,6 +33,7 @@ const Profile: React.FC<ProfileProps> = ({
   errorMessage,
   handleLogout,
   handlePasswordChange,
+  handlePhotoUpload,
 }) => {
   const router = useRouter();
   const [passwordData, setPasswordData] = useState({
@@ -38,6 +41,13 @@ const Profile: React.FC<ProfileProps> = ({
     newPassword: "",
     confirmPassword: "",
   });
+  const [showPhotoOptions, setShowPhotoOptions] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [showCropper, setShowCropper] = useState(false);
+  const [showCameraModal, setShowCameraModal] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -60,6 +70,97 @@ const Profile: React.FC<ProfileProps> = ({
     } catch (error: any) {
       alert("Gagal mengubah password: " + error.message);
     }
+  };
+
+  const handleFileSelect = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setSelectedImage(reader.result as string);
+        setShowCropper(true);
+        setShowPhotoOptions(false);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleCropComplete = async (croppedImage: Blob) => {
+    if (handlePhotoUpload) {
+      try {
+        await handlePhotoUpload(croppedImage);
+        setShowCropper(false);
+        setSelectedImage(null);
+      } catch (error: any) {
+        alert("Gagal mengupload foto: " + error.message);
+      }
+    }
+  };
+
+  const handleCropCancel = () => {
+    setShowCropper(false);
+    setSelectedImage(null);
+  };
+
+  const openFileSelector = () => {
+    fileInputRef.current?.click();
+    setShowPhotoOptions(false);
+  };
+
+  const openCamera = async () => {
+    setShowPhotoOptions(false);
+    setShowCameraModal(true);
+    
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        video: { facingMode: 'user' },
+        audio: false 
+      });
+      
+      streamRef.current = stream;
+      
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+      }
+    } catch (error) {
+      console.error('Error accessing camera:', error);
+      alert('Tidak dapat mengakses kamera. Pastikan izin kamera telah diberikan.');
+      setShowCameraModal(false);
+    }
+  };
+
+  const capturePhoto = () => {
+    if (!videoRef.current) return;
+    
+    const canvas = document.createElement('canvas');
+    canvas.width = videoRef.current.videoWidth;
+    canvas.height = videoRef.current.videoHeight;
+    
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+      ctx.drawImage(videoRef.current, 0, 0);
+      const imageData = canvas.toDataURL('image/jpeg');
+      
+      // Stop camera stream
+      stopCamera();
+      
+      // Open cropper with captured image
+      setSelectedImage(imageData);
+      setShowCropper(true);
+      setShowCameraModal(false);
+    }
+  };
+
+  const stopCamera = () => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
+    }
+  };
+
+  const closeCameraModal = () => {
+    stopCamera();
+    setShowCameraModal(false);
   };
 
   return (
@@ -101,18 +202,54 @@ const Profile: React.FC<ProfileProps> = ({
           {errorMessage && <div className="alert-error">{errorMessage}</div>}
 
           <div className="profile-avatar-section">
-            <div className="profile-avatar" style={{ marginBottom: "0.7rem" }}>
-              {user?.foto ? (
-                <img src={`/${user.foto}`} alt="Foto Profil" />
-              ) : (
-                <i className="fas fa-user"></i>
+            <div className="profile-avatar-wrapper">
+              <div className="profile-avatar" style={{ marginBottom: "0.7rem" }}>
+                {user?.foto ? (
+                  <img src={user.foto} alt="Foto Profil" />
+                ) : (
+                  <i className="fas fa-user"></i>
+                )}
+              </div>
+              <button 
+                className="change-photo-btn" 
+                onClick={() => setShowPhotoOptions(!showPhotoOptions)}
+                title="Ubah Foto Profile"
+              >
+                <i className="fas fa-camera"></i>
+              </button>
+              
+              {showPhotoOptions && (
+                <div className="photo-options-menu">
+                  <button onClick={openCamera} className="photo-option">
+                    <i className="fas fa-camera"></i> Ambil Foto
+                  </button>
+                  <button onClick={openFileSelector} className="photo-option">
+                    <i className="fas fa-upload"></i> Upload File
+                  </button>
+                </div>
               )}
+              
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleFileSelect}
+                style={{ display: "none" }}
+              />
             </div>
             <div className="profile-identity">
               <div className="profile-name">{user?.nama}</div>
               <div className="profile-email">{user?.email}</div>
             </div>
           </div>
+          
+          {showCropper && selectedImage && (
+            <ImageCropper
+              image={selectedImage}
+              onCropComplete={handleCropComplete}
+              onCancel={handleCropCancel}
+            />
+          )}
 
           <div className="profile-info-section">
             <div className="profile-info-title">Informasi Akun</div>
@@ -122,6 +259,30 @@ const Profile: React.FC<ProfileProps> = ({
                 <div className="profile-info-value">{user?.nama}</div>
               </div>
               <div className="profile-info-field">
+          {showCameraModal && (
+            <div className="camera-modal">
+              <div className="camera-modal-content">
+                <h3 className="camera-title">Ambil Foto Profile</h3>
+                <div className="camera-preview">
+                  <video 
+                    ref={videoRef} 
+                    autoPlay 
+                    playsInline
+                    className="camera-video"
+                  />
+                </div>
+                <div className="camera-actions">
+                  <button onClick={closeCameraModal} className="btn-cancel">
+                    <i className="fas fa-times"></i> Batal
+                  </button>
+                  <button onClick={capturePhoto} className="btn-capture">
+                    <i className="fas fa-camera"></i> Ambil Foto
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
                 <label>NPM:</label>
                 <div className="profile-info-value">{user?.npm}</div>
               </div>
