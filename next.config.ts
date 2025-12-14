@@ -3,6 +3,7 @@ import { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  turbopack: {},
   webpack(config, { isServer }) {
     if (!isServer) {
       config.resolve.fallback = {
