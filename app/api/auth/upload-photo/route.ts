@@ -28,32 +28,21 @@ export async function POST(req: Request) {
     const bytes = await photo.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Create unique filename
-    const timestamp = Date.now();
-    const ext = photo.name.split('.').pop();
-    const filename = `profile-${npm}-${timestamp}.${ext}`;
-    
-    // Save to public/images directory
-    const publicPath = path.join(process.cwd(), 'public', 'images', filename);
-    await writeFile(publicPath, buffer);
-
-    // Update database
+    // Update database: store buffer in MongoDB
     const { db } = await connectToDatabase();
-    const photoUrl = `/images/${filename}`;
-    
     await db.collection('users').updateOne(
       { npm: npm.toString() },
-      { 
-        $set: { 
-          foto: photoUrl,
+      {
+        $set: {
+          fotoBuffer: buffer,
+          fotoType: photo.type,
           updatedAt: new Date()
-        } 
+        }
       }
     );
 
     return NextResponse.json({
-      message: 'Photo uploaded successfully',
-      photoUrl: photoUrl
+      message: 'Photo uploaded successfully'
     }, { status: 200 });
 
   } catch (err) {
@@ -90,8 +79,15 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
+    if (!user.fotoBuffer) {
+      return NextResponse.json({ foto: null }, { status: 200 });
+    }
+
+    // Return base64 string and mime type
+    const base64 = user.fotoBuffer.toString('base64');
+    const mimeType = user.fotoType || 'image/jpeg';
     return NextResponse.json({
-      foto: user.foto || null
+      foto: `data:${mimeType};base64,${base64}`
     }, { status: 200 });
 
   } catch (err) {
