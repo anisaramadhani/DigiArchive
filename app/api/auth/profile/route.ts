@@ -42,13 +42,21 @@ export async function GET(req: Request) {
     }
 
     // Return user data (exclude password)
+    let foto = null;
+    if (user.fotoBuffer) {
+      const base64 = user.fotoBuffer.toString('base64');
+      const mimeType = user.fotoType || 'image/jpeg';
+      foto = `data:${mimeType};base64,${base64}`;
+    } else if (user.foto) {
+      foto = user.foto;
+    }
     return NextResponse.json({
       user: {
         nama: user.name,
         email: user.email,
         npm: user.npm,
         jurusan: user.jurusan || '-',
-        foto: user.foto || null,
+        foto: foto,
         created_at: user.createdAt,
       }
     }, { status: 200 });
