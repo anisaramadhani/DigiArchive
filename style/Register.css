@@ -258,7 +258,7 @@ body::before {
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);
   flex: 2;
-  padding: 3rem 3rem 2.5rem;
+  padding: 2.5rem 3rem 2.5rem;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -306,6 +306,52 @@ body::before {
   display: flex;
   gap: 1.5rem;
   margin-bottom: 1.5rem;
+}
+.register-form .form-row {
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 1.5rem;
+  margin-bottom: 1.1rem;
+}
+@media (max-width: 900px) {
+  .register-form .form-row {
+    flex-direction: column !important;
+    gap: 0.5rem;
+  }
+}
+.register-form .form-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.register-form .form-group label {
+  font-weight: 600;
+  margin-bottom: 0.4rem;
+  color: #232946;
+}
+.register-form .form-group input {
+  padding: 1.1rem 1.2rem;
+  border-radius: 12px;
+  border: 2px solid #e0e7ff;
+  font-size: 1.1rem;
+  background: #f7faff;
+  color: #232946;
+  outline: none;
+  transition: border 0.2s;
+  max-width: 320px;
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  box-sizing: border-box;
+}
+.register-form .form-group input:focus {
+  border: 2px solid #7c3aed;
+}
+@media (max-width: 900px) {
+  .register-form .form-row {
+    flex-direction: column !important;
+    gap: 0.5rem;
+  }
 }
 
 .form-group {
@@ -363,14 +409,15 @@ body::before {
 }
 
 /* Input animation on focus */
-.form-group {
+
+/* Animasi hanya untuk form-group di dalam register-form */
+.register-form .form-group {
   animation: slideUp 0.6s ease backwards;
 }
-
-.form-row:nth-child(1) .form-group { animation-delay: 0.7s; }
-.form-row:nth-child(2) .form-group { animation-delay: 0.8s; }
-.form-row:nth-child(3) .form-group { animation-delay: 0.9s; }
-.form-row:nth-child(4) .form-group { animation-delay: 1s; }
+.register-form .form-row:nth-child(3) .form-group { animation-delay: 0.7s; }
+.register-form .form-row:nth-child(4) .form-group { animation-delay: 0.8s; }
+.register-form .form-row:nth-child(5) .form-group { animation-delay: 0.9s; }
+.register-form .form-row:nth-child(6) .form-group { animation-delay: 1s; }
 
 @keyframes slideUp {
   0% {
@@ -393,8 +440,8 @@ body::before {
   font-size: 1.15rem;
   font-weight: 700;
   cursor: pointer;
-  margin-top: 1.5rem;
-  margin-bottom: 1rem;
+  margin-top: 1.2rem;
+  margin-bottom: 1.2rem;
   transition: all 0.3s ease;
   box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
   animation: slideUp 0.6s ease 1.1s backwards;
@@ -468,7 +515,8 @@ body::before {
 
 .back-link {
   text-align: center;
-  margin-top: 1.5rem;
+  margin-top: 0;
+  margin-bottom: 0.5rem;
   font-size: 0.95rem;
   color: var(--text-light);
   animation: slideUp 0.6s ease 1.2s backwards;

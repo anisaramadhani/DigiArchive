@@ -1,3 +1,9 @@
+
+import "../style/Profile.css";
+import "../style/AddDocument.css";
+import "../style/DeletedDocument.css";
+import "../style/Archive.css";
+
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 
